@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Visitor = require('../models/Visitor');
 const auth = require('../middleware/auth');
-const { upload, uploadPhoto } = require('../cloudinary'); // ← top pe!
+const { upload, uploadPhoto } = require('../cloudinary'); 
+const { getEmbedding } = require('../faceService');
+const { compareFaces } = require('../faceService');
 
 // GET — Sabhi visitors ki list
 router.get('/', auth, async (req, res) => {
@@ -22,14 +24,21 @@ router.get('/', auth, async (req, res) => {
 
 // POST — Naya visitor banao (photo ke saath)
 router.post('/', auth, upload.single('photo'), async (req, res) => {
-        try {
-            console.log('Body:', req.body);      // ← add karo
-            console.log('File:', req.file);      // ← add karo
-            
-            let photo_url = '';;
+    try {
+        let photo_url = '';
+        let face_data = '';
 
         if (req.file) {
+            // Cloudinary pe photo upload karo
             photo_url = await uploadPhoto(req.file.buffer);
+
+            // Face embedding nikalo
+            const base64Image = req.file.buffer.toString('base64');
+            const faceResult = await getEmbedding(base64Image);
+
+            if (faceResult.success) {
+                face_data = JSON.stringify(faceResult.embedding);
+            }
         }
 
         const { name, phone, id_number } = req.body;
@@ -38,7 +47,8 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
             name,
             phone,
             id_number,
-            photo_url
+            photo_url,
+            face_data  // ← embedding save ho rahi hai!
         });
 
         await visitor.save();
@@ -48,6 +58,65 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
         });
     } catch (error) {
         res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// POST — Face se visitor dhundho
+router.post('/identify', auth, upload.single('photo'), async (req, res) => {
+    try {
+        // Naya photo ka embedding nikalo
+        const base64Image = req.file.buffer.toString('base64');
+        const faceResult = await getEmbedding(base64Image);
+
+        if (!faceResult.success) {
+            return res.status(400).json({
+                success: false,
+                message: 'Chehra nahi mila!'
+            });
+        }
+
+        const newEmbedding = faceResult.embedding;
+
+        // Database se saare visitors lo jinka face_data hai
+        const visitors = await Visitor.find({ 
+            face_data: { $ne: '' } 
+        });
+
+        // Har visitor se compare karo
+        let matchedVisitor = null;
+        let highestSimilarity = 0;
+
+        for (const visitor of visitors) {
+            const storedEmbedding = JSON.parse(visitor.face_data);
+            const result = await compareFaces(newEmbedding, storedEmbedding);
+
+            if (result.match && result.similarity > highestSimilarity) {
+                highestSimilarity = result.similarity;
+                matchedVisitor = visitor;
+            }
+        }
+
+        if (matchedVisitor) {
+            return res.json({
+                success: true,
+                found: true,
+                similarity: highestSimilarity,
+                visitor: matchedVisitor,
+                message: `Welcome back ${matchedVisitor.name}! 👋`
+            });
+        }
+
+        res.json({
+            success: true,
+            found: false,
+            message: 'Naya visitor hai!'
+        });
+
+    } catch (error) {
+        res.status(500).json({
             success: false,
             message: error.message
         });
