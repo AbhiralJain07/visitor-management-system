@@ -6,6 +6,102 @@ const { upload, uploadPhoto } = require('../cloudinary');
 const { getEmbedding } = require('../faceService');
 const { compareFaces } = require('../faceService');
 
+/**
+ * @swagger
+ * /api/visitors:
+ *   get:
+ *     summary: Sabhi visitors ki list
+ *     tags: [Visitors]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Visitors list
+ */
+
+/**
+ * @swagger
+ * /api/visitors:
+ *   post:
+ *     summary: Naya visitor banao
+ *     tags: [Visitors]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               id_number:
+ *                 type: string
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Visitor created
+ */
+
+/**
+ * @swagger
+ * /api/visitors/identify:
+ *   post:
+ *     summary: Face se visitor pehchano
+ *     tags: [Visitors]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Visitor identified
+ */
+
+/**
+ * @swagger
+ * /api/visitors/{id}:
+ *   put:
+ *     summary: Visitor update karo
+ *     tags: [Visitors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Visitor updated
+ *   delete:
+ *     summary: Visitor delete karo
+ *     tags: [Visitors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Visitor deleted
+ */
+
 // GET — Sabhi visitors ki list
 router.get('/', auth, async (req, res) => {
     try {
@@ -109,7 +205,7 @@ router.post('/identify', auth, upload.single('photo'), async (req, res) => {
                     message: `⚠️ ALERT! ${matchedVisitor.name} blacklisted hai!`
                 });
             }
-            
+
             return res.json({
                 success: true,
                 found: true,

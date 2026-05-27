@@ -4,7 +4,56 @@ const Employee = require('../models/Employee');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// REGISTER — Naya employee banao
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Naya employee register karo
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               department:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Register successful
+
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login karo aur token lo
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful with token
+ */
+
+
+
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, role, department } = req.body;
