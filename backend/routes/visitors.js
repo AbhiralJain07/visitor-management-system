@@ -100,6 +100,16 @@ router.post('/identify', auth, upload.single('photo'), async (req, res) => {
         }
 
         if (matchedVisitor) {
+            if (matchedVisitor.is_blacklisted) {
+                return res.json({
+                    success: true,
+                    found: true,
+                    blacklisted: true,
+                    visitor: matchedVisitor,
+                    message: `⚠️ ALERT! ${matchedVisitor.name} blacklisted hai!`
+                });
+            }
+            
             return res.json({
                 success: true,
                 found: true,
@@ -122,6 +132,8 @@ router.post('/identify', auth, upload.single('photo'), async (req, res) => {
         });
     }
 });
+
+
 
 // PUT — Visitor update karo
 router.put('/:id', auth, async (req, res) => {
