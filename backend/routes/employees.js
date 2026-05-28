@@ -7,7 +7,7 @@ const { auth, checkRole } = require('../middleware/auth');
  * @swagger
  * /api/employees:
  *   get:
- *     summary: Sabhi employees ki list
+ *     summary: list of Employees
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
@@ -15,11 +15,12 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Employees list
  *   post:
- *     summary: Naya employee banao
+ *     summary: create new employee
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -27,20 +28,26 @@ const { auth, checkRole } = require('../middleware/auth');
  *             properties:
  *               name:
  *                 type: string
+ *                 example: Rahul Sharma
  *               email:
  *                 type: string
+ *                 example: rahul@vms.com
  *               password:
  *                 type: string
+ *                 example: rahul123
  *               role:
  *                 type: string
+ *                 enum: [admin, receptionist, employee]
+ *                 example: employee
  *               department:
  *                 type: string
+ *                 example: IT
  *     responses:
  *       201:
- *         description: Employee created
+ *         description: employee created
  * /api/employees/{id}:
  *   put:
- *     summary: Employee update karo
+ *     summary: update employee
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
@@ -50,11 +57,35 @@ const { auth, checkRole } = require('../middleware/auth');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Rahul Sharma
+ *               email:
+ *                 type: string
+ *                 example: rahul@vms.com
+ *               telegram_id:
+ *                 type: string
+ *                 example: "7905910620"
+ *               department:
+ *                 type: string
+ *                 example: IT
+ *               role:
+ *                 type: string
+ *                 enum: [admin, receptionist, employee]
+ *                 example: admin
  *     responses:
  *       200:
- *         description: Employee updated
+ *         description: employee updated
  *   delete:
- *     summary: Employee delete karo
+ *     summary: delete employee
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
@@ -64,9 +95,10 @@ const { auth, checkRole } = require('../middleware/auth');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
  *     responses:
  *       200:
- *         description: Employee deleted
+ *         description: employee deleted
  */
 
 router.get('/', auth, checkRole('admin'), async (req, res) => {

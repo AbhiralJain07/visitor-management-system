@@ -16,21 +16,49 @@ const jwt = require('jsonwebtoken');
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *               - role
  *             properties:
  *               name:
  *                 type: string
+ *                 example: Abhiral Jain
  *               email:
  *                 type: string
+ *                 example: abhiral@vms.com
  *               password:
  *                 type: string
+ *                 example: admin123
  *               role:
  *                 type: string
+ *                 enum: [admin, receptionist, employee]
+ *                 example: admin
  *               department:
  *                 type: string
+ *                 example: IT
  *     responses:
  *       201:
  *         description: Register successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Employee register ho gaya!
+ *       400:
+ *         description: Email already registered
+ *       500:
+ *         description: Server error
+ */
 
+ /**
  * @swagger
  * /api/auth/login:
  *   post:
@@ -42,17 +70,49 @@ const jwt = require('jsonwebtoken');
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - password
  *             properties:
  *               email:
  *                 type: string
+ *                 example: abhiral@vms.com
  *               password:
  *                 type: string
+ *                 example: admin123
  *     responses:
  *       200:
- *         description: Login successful with token
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiJ9...
+ *                 employee:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                       example: Abhiral Jain
+ *                     email:
+ *                       type: string
+ *                       example: abhiral@vms.com
+ *                     role:
+ *                       type: string
+ *                       example: admin
+ *       400:
+ *         description: Email ya password galat hai
+ *       500:
+ *         description: Server error
  */
-
-
 
 router.post('/register', async (req, res) => {
     try {

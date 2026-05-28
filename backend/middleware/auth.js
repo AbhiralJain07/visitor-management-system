@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken'); // ← zaroori hai!
+const jwt = require('jsonwebtoken'); 
 
 const auth = (req, res, next) => {
     try {

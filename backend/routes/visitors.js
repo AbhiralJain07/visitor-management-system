@@ -83,6 +83,23 @@ const { compareFaces } = require('../faceService');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Ramesh Kumar
+ *               phone:
+ *                 type: string
+ *                 example: "9876543210"
+ *               is_blacklisted:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: Visitor updated
@@ -97,6 +114,7 @@ const { compareFaces } = require('../faceService');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
  *     responses:
  *       200:
  *         description: Visitor deleted

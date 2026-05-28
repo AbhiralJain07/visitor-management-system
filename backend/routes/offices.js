@@ -20,6 +20,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -27,16 +28,19 @@ const { auth, checkRole } = require('../middleware/auth');
  *             properties:
  *               name:
  *                 type: string
+ *                 example: Delhi HQ
  *               city:
  *                 type: string
- *               purpose:
+ *                 example: Delhi
+ *               address:
  *                 type: string
+ *                 example: Connaught Place, New Delhi
  *     responses:
  *       201:
  *         description: Office created
  * /api/offices/{id}:
  *   put:
- *     summary: Office update karo (approve/reject)
+ *     summary: Office update karo
  *     tags: [Offices]
  *     security:
  *       - bearerAuth: []
@@ -46,6 +50,26 @@ const { auth, checkRole } = require('../middleware/auth');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Mumbai Office
+ *               city:
+ *                 type: string
+ *                 example: Mumbai
+ *               address:
+ *                 type: string
+ *                 example: Bandra Kurla Complex, Mumbai
+ *               is_active:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       200:
  *         description: Office updated
@@ -60,6 +84,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
  *     responses:
  *       200:
  *         description: Office deleted

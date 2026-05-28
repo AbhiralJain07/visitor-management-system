@@ -2,8 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const swaggerUi = require('swagger-ui-express');      // ← add karo
-const swaggerJsdoc = require('swagger-jsdoc');        // ← add karo
+const swaggerUi = require('swagger-ui-express');      
+const swaggerJsdoc = require('swagger-jsdoc');       
 
 dotenv.config();
 
@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Swagger Setup
-const swaggerOptions = {                              // ← add karo
+const swaggerOptions = {                              
     definition: {
         openapi: '3.0.0',
         info: {

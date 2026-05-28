@@ -10,7 +10,7 @@ const { sendMessage } = require('../telegram');
  * @swagger
  * /api/visits:
  *   get:
- *     summary: Sabhi visits ki list
+ *     summary: list of Visits
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
@@ -18,11 +18,51 @@ const { sendMessage } = require('../telegram');
  *       200:
  *         description: Visits list
  *   post:
- *     summary: Naya visit banao
+ *     summary: create new visit
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Rahul Sharma
+ *               email:
+ *                 type: string
+ *                 example: rahul@vms.com
+ *               password:
+ *                 type: string
+ *                 example: rahul123
+ *               role:
+ *                 type: string
+ *                 enum: [admin, receptionist, employee]
+ *                 example: employee
+ *               department:
+ *                 type: string
+ *                 example: IT
+ *     responses:
+ *       201:
+ *         description: visit created
+ * /api/visits/{id}:
+ *   put:
+ *     summary: update visit
+ *     tags: [Visits]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
+ *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -30,32 +70,21 @@ const { sendMessage } = require('../telegram');
  *             properties:
  *               visitor_id:
  *                 type: string
+ *                 example: 6a16a9b2dab081b48816a5e4
  *               host_id:
  *                 type: string
+ *                 example: 6a16a9b2dab081b48816a5e4
  *               office_id:
  *                 type: string
+ *                 example: "6a16a9b2dab081b48816a5e4"
  *               purpose:
  *                 type: string
- *     responses:
- *       201:
- *         description: Visit created
- * /api/visits/{id}:
- *   put:
- *     summary: Visit update karo
- *     tags: [Visits]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
+ *                 example: meeting
  *     responses:
  *       200:
- *         description: Visit updated
+ *         description: visit updated
  *   delete:
- *     summary: Visit delete karo
+ *     summary: delete visit
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
@@ -65,6 +94,7 @@ const { sendMessage } = require('../telegram');
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6a16a9b2dab081b48816a5e4
  *     responses:
  *       200:
  *         description: Visit deleted
