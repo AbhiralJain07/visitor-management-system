@@ -1,9 +1,72 @@
 const express = require('express');
 const router = express.Router();
 const Office = require('../models/Office'); 
-const auth = require('../middleware/auth');
+const { auth, checkRole } = require('../middleware/auth');
 
-router.get('/', auth , async (req, res) => {
+/**
+ * @swagger
+ * /api/offices:
+ *   get:
+ *     summary: Sabhi offices ki list
+ *     tags: [Offices]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Offices list
+ *   post:
+ *     summary: Naya office banao
+ *     tags: [Offices]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               purpose:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Office created
+ * /api/offices/{id}:
+ *   put:
+ *     summary: Office update karo (approve/reject)
+ *     tags: [Offices]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Office updated
+ *   delete:
+ *     summary: Office delete karo
+ *     tags: [Offices]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Office deleted
+ */
+
+
+router.get('/', auth, checkRole('admin'), async (req, res) => {
     try {
         const office = await Office.find(); 
         res.json({
@@ -18,7 +81,7 @@ router.get('/', auth , async (req, res) => {
     }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, checkRole('admin'), async (req, res) => {
     try {
         const office = new Office(req.body); 
         await office.save();                    
@@ -35,7 +98,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // PUT — Office update karo
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const office = await Office.findByIdAndUpdate(
             req.params.id,
@@ -61,7 +124,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // DELETE — Office delete karo
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const office = await Office.findByIdAndDelete(req.params.id);
         if (!office) {

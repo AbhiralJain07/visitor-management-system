@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Visitor = require('../models/Visitor');
-const auth = require('../middleware/auth');
+const { auth, checkRole } = require('../middleware/auth');
 const { upload, uploadPhoto } = require('../cloudinary'); 
 const { getEmbedding } = require('../faceService');
 const { compareFaces } = require('../faceService');
@@ -103,7 +103,7 @@ const { compareFaces } = require('../faceService');
  */
 
 // GET — Sabhi visitors ki list
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, checkRole('admin', 'receptionist'), async (req, res) => {
     try {
         const visitors = await Visitor.find();
         res.json({
@@ -119,7 +119,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // POST — Naya visitor banao (photo ke saath)
-router.post('/', auth, upload.single('photo'), async (req, res) => {
+router.post('/', auth, checkRole('admin', 'receptionist'), upload.single('photo'), async (req, res) => {
     try {
         let photo_url = '';
         let face_data = '';
@@ -161,7 +161,7 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 });
 
 // POST — Face se visitor dhundho
-router.post('/identify', auth, upload.single('photo'), async (req, res) => {
+router.post('/identify', auth, checkRole('admin', 'receptionist'), upload.single('photo'), async (req, res) => {
     try {
         // Naya photo ka embedding nikalo
         const base64Image = req.file.buffer.toString('base64');
@@ -232,7 +232,7 @@ router.post('/identify', auth, upload.single('photo'), async (req, res) => {
 
 
 // PUT — Visitor update karo
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const visitor = await Visitor.findByIdAndUpdate(
             req.params.id,
@@ -258,7 +258,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // DELETE — Visitor delete karo
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const visitor = await Visitor.findByIdAndDelete(req.params.id);
         if (!visitor) {
