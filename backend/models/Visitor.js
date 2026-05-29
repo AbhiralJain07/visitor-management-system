@@ -24,9 +24,23 @@ const visitorSchema = new mongoose.Schema({
     is_blacklisted: {
         type: Boolean,
         default: false
+    },
+    // Multi-tenancy fields
+    tenant_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tenant',
+        default: null
+    },
+    realm_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Realm',
+        default: null
     }
 }, {
     timestamps: true
 });
+
+// Ek tenant mein same phone number unique hoga
+visitorSchema.index({ tenant_id: 1, phone: 1 }, { unique: true });
 
 module.exports = mongoose.model('Visitor', visitorSchema);
