@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Employee = require('../models/Employee');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Naya employee register karo
+ *     summary: Naya user register karo
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -33,32 +33,27 @@ const jwt = require('jsonwebtoken');
  *                 example: admin123
  *               role:
  *                 type: string
- *                 enum: [admin, receptionist, employee]
- *                 example: admin
+ *                 enum: [tenant_admin, receptionist, employee]
+ *                 example: tenant_admin
  *               department:
  *                 type: string
  *                 example: IT
+ *               tenant_id:
+ *                 type: string
+ *                 example: 6a16a9b2dab081b48816a5e4
+ *               realm_id:
+ *                 type: string
+ *                 example: 6a16a9b2dab081b48816a5e4
  *     responses:
  *       201:
  *         description: Register successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Employee register ho gaya!
  *       400:
  *         description: Email already registered
  *       500:
  *         description: Server error
  */
 
- /**
+/**
  * @swagger
  * /api/auth/login:
  *   post:
@@ -76,74 +71,89 @@ const jwt = require('jsonwebtoken');
  *             properties:
  *               email:
  *                 type: string
- *                 example: abhiral@vms.com
+ *                 example: superadmin@vms.com
  *               password:
  *                 type: string
- *                 example: admin123
+ *                 example: super@admin123
  *     responses:
  *       200:
- *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 token:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiJ9...
- *                 employee:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     name:
- *                       type: string
- *                       example: Abhiral Jain
- *                     email:
- *                       type: string
- *                       example: abhiral@vms.com
- *                     role:
- *                       type: string
- *                       example: admin
+ *         description: Login successful with token
  *       400:
  *         description: Email ya password galat hai
  *       500:
  *         description: Server error
  */
 
-router.post('/register', async (req, res) => {
+// SUPER ADMIN REGISTER — Sirf ek baar use karo!
+router.post('/super-admin/register', async (req, res) => {
     try {
-        const { name, email, password, role, department } = req.body;
+        const { name, email, password } = req.body;
 
-        // Pehle check karo — email already hai kya?
-        const existingEmployee = await Employee.findOne({ email });
-        if (existingEmployee) {
+        const existing = await User.findOne({ role: 'super_admin' });
+        if (existing) {
             return res.status(400).json({
                 success: false,
-                message: 'email already registered!'
+                message: 'Super Admin already exist karta hai!'
             });
         }
 
-        // Password encrypt karo
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Naya employee banao
-        const employee = new Employee({
+        const superAdmin = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'super_admin',
+            tenant_id: null,
+            realm_id: null
+        });
+
+        await superAdmin.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Super Admin ban gaya! 👑'
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// REGISTER — Naya user banao
+router.post('/register', async (req, res) => {
+    try {
+        const { name, email, password, role, department, tenant_id, realm_id } = req.body;
+
+        // Email already exist karti hai kya?
+        const existingUser = await User.findOne({ email, tenant_id });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'Yeh email already registered hai!'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = new User({
             name,
             email,
             password: hashedPassword,
             role,
-            department
+            department,
+            tenant_id,
+            realm_id
         });
 
-        await employee.save();
+        await user.save();
 
         res.status(201).json({
             success: true,
-            message: 'Employee registered!'
+            message: 'User register ho gaya!'
         });
 
     } catch (error) {
@@ -159,27 +169,37 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Employee dhundo
-        const employee = await Employee.findOne({ email });
-        if (!employee) {
+        // User dhundo — dono models mein check karo
+        const user = await User.findOne({ email });
+        if (!user) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or Password is wrong!'
+                message: 'Email ya password galat hai!'
             });
         }
 
         // Password check karo
-        const isMatch = await bcrypt.compare(password, employee.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or Password is wrong!'
+                message: 'Email ya password galat hai!'
             });
         }
 
-        // Token banao
+        // Last login update karo
+        user.last_login = new Date();
+        await user.save();
+
+        // Token banao — tenant_id aur realm_id bhi daalo!
         const token = jwt.sign(
-            { id: employee._id, role: employee.role },
+            {
+                id: user._id,
+                role: user.role,
+                tenant_id: user.tenant_id,
+                realm_id: user.realm_id,
+                language: user.language
+            },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
@@ -187,11 +207,14 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             token,
-            employee: {
-                id: employee._id,
-                name: employee.name,
-                email: employee.email,
-                role: employee.role
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                tenant_id: user.tenant_id,
+                realm_id: user.realm_id,
+                language: user.language
             }
         });
 

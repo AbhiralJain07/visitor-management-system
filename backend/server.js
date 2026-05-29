@@ -43,6 +43,11 @@ const visitRoutes = require('./routes/visits');
 const employeeRoutes = require('./routes/employees');
 const officeRoutes = require('./routes/offices');
 const authRoutes = require('./routes/auth');
+const tenantRoutes = require('./routes/tenants');
+const realmRoutes = require('./routes/realms');
+const userRoutes = require('./routes/users');
+const masterTypeRoutes = require('./routes/masterTypes');
+const masterDataRoutes = require('./routes/masterData');
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // ← add karo
 app.use('/api/visitors', visitorRoutes);
@@ -50,6 +55,11 @@ app.use('/api/visits', visitRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/offices', officeRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/tenants', tenantRoutes);
+app.use('/api/realms', realmRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/master-types', masterTypeRoutes);
+app.use('/api/master-data', masterDataRoutes);
 
 // Test route
 app.get('/', (req, res) => {
