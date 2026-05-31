@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { createAuditLog } = require('../middleware/auditLog'); 
 
 /**
  * @swagger
@@ -84,7 +85,7 @@ const jwt = require('jsonwebtoken');
  *         description: Server error
  */
 
-// SUPER ADMIN REGISTER — Sirf ek baar use karo!
+// SUPER ADMIN REGISTER
 router.post('/super-admin/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -93,7 +94,7 @@ router.post('/super-admin/register', async (req, res) => {
         if (existing) {
             return res.status(400).json({
                 success: false,
-                message: 'Super Admin already exist karta hai!'
+                message: 'Super Admin already exist!'
             });
         }
 
@@ -112,7 +113,7 @@ router.post('/super-admin/register', async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Super Admin ban gaya! 👑'
+            message: 'Super Admin created! 👑'
         });
 
     } catch (error) {
@@ -123,17 +124,16 @@ router.post('/super-admin/register', async (req, res) => {
     }
 });
 
-// REGISTER — Naya user banao
+// REGISTER
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, role, department, tenant_id, realm_id } = req.body;
 
-        // Email already exist karti hai kya?
         const existingUser = await User.findOne({ email, tenant_id });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Yeh email already registered hai!'
+                message: 'this email already registered!'
             });
         }
 
@@ -153,7 +153,7 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'User register ho gaya!'
+            message: 'User registered!'
         });
 
     } catch (error) {
@@ -164,34 +164,50 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// LOGIN — Token lo
+// LOGIN
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // User dhundo — dono models mein check karo
         const user = await User.findOne({ email });
         if (!user) {
+            // Failed login bhi log karo!
+            await createAuditLog({
+                action: 'LOGIN',
+                module: 'auth',
+                description: `Failed login attempt: ${email}`,
+                ip_address: req.ip,
+                status: 'failed',
+                metadata: { email }
+            });
             return res.status(400).json({
                 success: false,
-                message: 'Email ya password galat hai!'
+                message: 'Email or password is wrong!!'
             });
         }
 
-        // Password check karo
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            // Wrong password bhi log karo!
+            await createAuditLog({
+                user_id: user._id,
+                user_email: user.email,
+                action: 'LOGIN',
+                module: 'auth',
+                description: `Wrong password attempt: ${email}`,
+                ip_address: req.ip,
+                status: 'failed',
+                tenant_id: user.tenant_id
+            });
             return res.status(400).json({
                 success: false,
-                message: 'Email ya password galat hai!'
+                message: 'Email or password is wrong!'
             });
         }
 
-        // Last login update karo
         user.last_login = new Date();
         await user.save();
 
-        // Token banao — tenant_id aur realm_id bhi daalo!
         const token = jwt.sign(
             {
                 id: user._id,
@@ -203,6 +219,22 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
+
+        // Successful login log karo!
+        await createAuditLog({
+            user_id: user._id,
+            user_email: user.email,
+            action: 'LOGIN',
+            module: 'auth',
+            description: `${user.name} logeed in successfully`,
+            ip_address: req.ip,
+            status: 'success',
+            tenant_id: user.tenant_id,
+            metadata: {
+                role: user.role,
+                realm_id: user.realm_id
+            }
+        });
 
         res.json({
             success: true,

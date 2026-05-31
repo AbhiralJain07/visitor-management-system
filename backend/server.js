@@ -2,19 +2,40 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const swaggerUi = require('swagger-ui-express');      
-const swaggerJsdoc = require('swagger-jsdoc');       
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 
+const app = express(); // ← PEHLE app banao!
 
-const app = express();
+// Rate Limiters
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: {
+        success: false,
+        message: 'Bahut zyada requests! 15 minute baad try karo!'
+    }
+});
 
+const loginLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000,
+    max: 5,
+    message: {
+        success: false,
+        message: 'Too many login attempts! Try after 30 minutes!'
+    }
+});
+
+// Middleware
+app.use(globalLimiter); // ← app ke baad!
 app.use(cors());
 app.use(express.json());
 
 // Swagger Setup
-const swaggerOptions = {                              
+const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
         info: {
@@ -36,31 +57,33 @@ const swaggerOptions = {
     apis: ['./routes/*.js']
 };
 
-const swaggerDocs = swaggerJsdoc(swaggerOptions);    // ← add karo
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-// Routes
+// Routes Import
 const visitorRoutes = require('./routes/visitors');
-const visitRoutes = require('./routes/visits'); 
-// const employeeRoutes = require('./routes/employees');
-const officeRoutes = require('./routes/offices');
+const visitRoutes = require('./routes/visits');
 const authRoutes = require('./routes/auth');
 const tenantRoutes = require('./routes/tenants');
 const realmRoutes = require('./routes/realms');
 const userRoutes = require('./routes/users');
 const masterTypeRoutes = require('./routes/masterTypes');
 const masterDataRoutes = require('./routes/masterData');
+const auditLogRoutes = require('./routes/auditLogs');
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs)); 
+// Login strict limiter
+app.use('/api/auth/login', loginLimiter);
+
+// Routes Use
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/visits', visitRoutes);
-// app.use('/api/employees', employeeRoutes);
-// app.use('/api/offices', officeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
 app.use('/api/realms', realmRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/master-types', masterTypeRoutes);
 app.use('/api/master-data', masterDataRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
 
 // Test route
 app.get('/', (req, res) => {
