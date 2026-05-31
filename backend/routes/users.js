@@ -207,4 +207,50 @@ router.delete('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req
     }
 });
 
+/**
+ * @swagger
+ * /api/users/language:
+ *   put:
+ *     summary: Apni language update karo
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               language:
+ *                 type: string
+ *                 enum: [en, hi, ta, te, mr]
+ *                 example: hi
+ *     responses:
+ *       200:
+ *         description: Language updated
+ */
+router.put('/language', auth, async (req, res) => {
+    try {
+        const { language } = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { language },
+            { new: true }
+        ).select('-password');
+
+        res.json({
+            success: true,
+            message: `Language ${language} set ho gayi!`,
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 module.exports = router;

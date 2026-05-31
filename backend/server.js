@@ -7,6 +7,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 
 dotenv.config();
 
+
 const app = express();
 
 app.use(cors());
@@ -49,7 +50,7 @@ const userRoutes = require('./routes/users');
 const masterTypeRoutes = require('./routes/masterTypes');
 const masterDataRoutes = require('./routes/masterData');
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // ← add karo
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs)); 
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/visits', visitRoutes);
 // app.use('/api/employees', employeeRoutes);
