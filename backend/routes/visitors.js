@@ -4,6 +4,7 @@ const Visitor = require('../models/Visitor');
 const { auth, checkRole } = require('../middleware/auth');
 const { upload, uploadPhoto } = require('../cloudinary');
 const { getEmbedding, compareFaces } = require('../faceService');
+const { createAuditLog } = require('../middleware/auditLog'); 
 
 /**
  * @swagger
@@ -150,6 +151,18 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'),
                 face_data = JSON.stringify(faceResult.embedding);
             }
         }
+
+        await createAuditLog({
+            user_id: req.user.id,
+            user_email: req.user.email,
+            action: 'CREATE',
+            module: 'visitor',
+            description: `Naya visitor add kiya: ${name}`,
+            ip_address: req.ip,
+            status: 'success',
+            tenant_id: req.user.tenant_id,
+            metadata: { visitor_name: name, phone }
+        });
 
         const { name, phone, id_number } = req.body;
 

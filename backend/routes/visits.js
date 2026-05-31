@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Visitor = require('../models/Visitor');
 const { auth, checkRole } = require('../middleware/auth');
 const { sendMessage } = require('../telegram');
+const { createAuditLog } = require('../middleware/auditLog');
 
 /**
  * @swagger
@@ -136,6 +137,18 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'),
             office_id: req.user.realm_id,
             tenant_id: req.user.tenant_id,  // ← token se!
             realm_id: req.user.realm_id      // ← token se!
+        });
+
+        await createAuditLog({
+            user_id: req.user.id,
+            user_email: req.user.email,
+            action: 'CREATE',
+            module: 'visit',
+            description: `Naya visit create kiya`,
+            ip_address: req.ip,
+            status: 'success',
+            tenant_id: req.user.tenant_id,
+            metadata: { visitor_id, host_id, purpose }
         });
 
         await visit.save();
