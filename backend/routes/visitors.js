@@ -115,10 +115,12 @@ const { createAuditLog } = require('../middleware/auditLog');
  */
 
 // GET — Sabhi visitors
+// GET — Sabhi visitors (Search + Filter + Pagination)
 router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), async (req, res) => {
     try {
         let query = {};
 
+        // Tenant filter
         if (req.user.role !== 'super_admin') {
             query.tenant_id = req.user.tenant_id;
         }
@@ -127,11 +129,45 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
             query.realm_id = req.user.realm_id;
         }
 
+        // Search — name ya phone se dhundho
+        if (req.query.search) {
+            query.$or = [
+                { name: { $regex: req.query.search, $options: 'i' } },
+                { phone: { $regex: req.query.search, $options: 'i' } },
+                { id_number: { $regex: req.query.search, $options: 'i' } }
+            ];
+        }
+
+        // Filter — blacklisted
+        if (req.query.is_blacklisted !== undefined) {
+            query.is_blacklisted = req.query.is_blacklisted === 'true';
+        }
+
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Total count
+        const total = await Visitor.countDocuments(query);
+
         const visitors = await Visitor.find(query)
             .populate('tenant_id', 'name code')
-            .populate('realm_id', 'name code');
+            .populate('realm_id', 'name code')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.json({ success: true, data: visitors });
+        res.json({
+            success: true,
+            data: visitors,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

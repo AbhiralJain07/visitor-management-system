@@ -128,7 +128,7 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res
 router.get('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const realm = await Realm.findById(req.params.id).populate('tenant_id', 'name code');
-        if (!realm) return res.status(404).json({ success: false, message: 'Realm nahi mila!' });
+        if (!realm) return res.status(404).json({ success: false, message: 'Realm not found!' });
         res.json({ success: true, data: realm });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -139,7 +139,7 @@ router.get('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const realm = await Realm.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!realm) return res.status(404).json({ success: false, message: 'Realm nahi mila!' });
+        if (!realm) return res.status(404).json({ success: false, message: 'Realm not found!' });
         res.json({ success: true, data: realm });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -150,8 +150,8 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const realm = await Realm.findByIdAndDelete(req.params.id);
-        if (!realm) return res.status(404).json({ success: false, message: 'Realm nahi mila!' });
-        res.json({ success: true, message: 'Realm delete ho gaya!' });
+        if (!realm) return res.status(404).json({ success: false, message: 'Realm not found!' });
+        res.json({ success: true, message: 'Realm deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

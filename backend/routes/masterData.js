@@ -63,7 +63,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: MasterData created
  * /api/master-data/{id}:
  *   put:
- *     summary: MasterData update karo
+ *     summary:  update MasterData
  *     tags: [MasterData]
  *     security:
  *       - bearerAuth: []
@@ -177,7 +177,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
             req.body,
             { new: true }
         );
-        if (!masterData) return res.status(404).json({ success: false, message: 'MasterData nahi mila!' });
+        if (!masterData) return res.status(404).json({ success: false, message: 'MasterData not found!' });
         res.json({ success: true, data: masterData });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -188,8 +188,8 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const masterData = await MasterData.findByIdAndDelete(req.params.id);
-        if (!masterData) return res.status(404).json({ success: false, message: 'MasterData nahi mila!' });
-        res.json({ success: true, message: 'MasterData delete ho gaya!' });
+        if (!masterData) return res.status(404).json({ success: false, message: 'MasterData not found!' });
+        res.json({ success: true, message: 'MasterData deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

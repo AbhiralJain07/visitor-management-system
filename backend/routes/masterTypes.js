@@ -133,7 +133,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
             req.body,
             { new: true }
         );
-        if (!masterType) return res.status(404).json({ success: false, message: 'MasterType nahi mila!' });
+        if (!masterType) return res.status(404).json({ success: false, message: 'MasterType not found!' });
         res.json({ success: true, data: masterType });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -144,8 +144,8 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const masterType = await MasterType.findByIdAndDelete(req.params.id);
-        if (!masterType) return res.status(404).json({ success: false, message: 'MasterType nahi mila!' });
-        res.json({ success: true, message: 'MasterType delete ho gaya!' });
+        if (!masterType) return res.status(404).json({ success: false, message: 'MasterType not found!' });
+        res.json({ success: true, message: 'MasterType deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

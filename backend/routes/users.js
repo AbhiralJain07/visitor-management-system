@@ -147,7 +147,7 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res
         if (existing) {
             return res.status(400).json({
                 success: false,
-                message: 'Yeh email already registered hai!'
+                message: 'email already registered!'
             });
         }
 
@@ -189,7 +189,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
             { new: true }
         ).select('-password');
 
-        if (!user) return res.status(404).json({ success: false, message: 'User nahi mila!' });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found!' });
         res.json({ success: true, data: user });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -200,8 +200,8 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 router.delete('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) return res.status(404).json({ success: false, message: 'User nahi mila!' });
-        res.json({ success: true, message: 'User delete ho gaya!' });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found!' });
+        res.json({ success: true, message: 'User deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -211,7 +211,7 @@ router.delete('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req
  * @swagger
  * /api/users/language:
  *   put:
- *     summary: Apni language update karo
+ *     summary: Apni language updated
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -242,7 +242,7 @@ router.put('/language', auth, async (req, res) => {
 
         res.json({
             success: true,
-            message: `Language ${language} set ho gayi!`,
+            message: `Language ${language} selected!`,
             data: user
         });
     } catch (error) {

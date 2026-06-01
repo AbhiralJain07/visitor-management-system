@@ -9,7 +9,7 @@ const auth = (req, res, next) => {
     } catch (error) {
         res.status(401).json({
             success: false,
-            message: 'Pehle login karo!'
+            message: 'login first!'
         });
     }
 };
@@ -19,7 +19,7 @@ const checkRole = (...roles) => {
         if (!roles.includes(req.user.role)) {
             return res.status(403).json({
                 success: false,
-                message: 'Access denied! Tumhare paas permission nahi hai!'
+                message: 'Access denied!'
             });
         }
         next();

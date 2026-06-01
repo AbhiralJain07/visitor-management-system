@@ -123,7 +123,7 @@ router.post('/', auth, checkRole('super_admin'), async (req, res) => {
 router.get('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = await Tenant.findById(req.params.id);
-        if (!tenant) return res.status(404).json({ success: false, message: 'Tenant nahi mila!' });
+        if (!tenant) return res.status(404).json({ success: false, message: 'Tenant not found!' });
         res.json({ success: true, data: tenant });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -134,7 +134,7 @@ router.get('/:id', auth, checkRole('super_admin'), async (req, res) => {
 router.put('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = await Tenant.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!tenant) return res.status(404).json({ success: false, message: 'Tenant nahi mila!' });
+        if (!tenant) return res.status(404).json({ success: false, message: 'Tenant not found!' });
         res.json({ success: true, data: tenant });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -145,8 +145,8 @@ router.put('/:id', auth, checkRole('super_admin'), async (req, res) => {
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = await Tenant.findByIdAndDelete(req.params.id);
-        if (!tenant) return res.status(404).json({ success: false, message: 'Tenant nahi mila!' });
-        res.json({ success: true, message: 'Tenant delete ho gaya!' });
+        if (!tenant) return res.status(404).json({ success: false, message: 'Tenant not found!' });
+        res.json({ success: true, message: 'Tenant deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
