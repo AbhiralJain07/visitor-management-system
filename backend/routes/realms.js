@@ -7,7 +7,7 @@ const { auth, checkRole } = require('../middleware/auth');
  * @swagger
  * /api/realms:
  *   get:
- *     summary: Sabhi realms ki list
+ *     summary: All realms list
  *     tags: [Realms]
  *     security:
  *       - bearerAuth: []
@@ -15,7 +15,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Realms list
  *   post:
- *     summary: Naya realm banao
+ *     summary: Create new realm
  *     tags: [Realms]
  *     security:
  *       - bearerAuth: []
@@ -49,7 +49,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: Realm created
  * /api/realms/{id}:
  *   put:
- *     summary: Realm update karo
+ *     summary: Update realm
  *     tags: [Realms]
  *     security:
  *       - bearerAuth: []
@@ -76,7 +76,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Realm updated
  *   delete:
- *     summary: Realm delete karo
+ *     summary: Delete realm
  *     tags: [Realms]
  *     security:
  *       - bearerAuth: []
@@ -91,12 +91,12 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: Realm deleted
  */
 
-// GET — Sabhi realms
+// GET — All realms
 router.get('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         let query = {};
 
-        // Super admin sabhi dekhe, tenant admin sirf apne
+        // Super admin see all, tenant admin only see their own
         if (req.user.role !== 'super_admin') {
             query.tenant_id = req.user.tenant_id;
         }
@@ -108,10 +108,10 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res)
     }
 });
 
-// POST — Naya realm
+// POST — Create new realm
 router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
-        // Tenant admin sirf apne tenant mein realm bana sakta hai
+        // Tenant admin can only create realms in their own tenant
         if (req.user.role === 'tenant_admin') {
             req.body.tenant_id = req.user.tenant_id;
         }
@@ -124,7 +124,7 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res
     }
 });
 
-// GET — Single realm
+// GET — Get single realm
 router.get('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const realm = await Realm.findById(req.params.id).populate('tenant_id', 'name code');
@@ -135,7 +135,7 @@ router.get('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
     }
 });
 
-// PUT — Realm update
+// PUT — Update realm
 router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const realm = await Realm.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -146,7 +146,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
     }
 });
 
-// DELETE — Realm delete
+// DELETE — Delete realm
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const realm = await Realm.findByIdAndDelete(req.params.id);

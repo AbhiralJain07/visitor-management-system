@@ -8,7 +8,7 @@ const { auth, checkRole } = require('../middleware/auth');
  * @swagger
  * /api/master-data:
  *   get:
- *     summary: Sabhi master data ki list
+ *     summary: All master data list fetched successfully!
  *     tags: [MasterData]
  *     security:
  *       - bearerAuth: []
@@ -18,12 +18,12 @@ const { auth, checkRole } = require('../middleware/auth');
  *         schema:
  *           type: string
  *         example: VISIT_PURPOSE
- *         description: MasterType code se filter karo
+ *         description: Filter by MasterType code
  *     responses:
  *       200:
- *         description: MasterData list
+ *         description: All master data list fetched successfully!
  *   post:
- *     summary: Naya master data banao
+ *     summary: Create new master data
  *     tags: [MasterData]
  *     security:
  *       - bearerAuth: []
@@ -60,10 +60,10 @@ const { auth, checkRole } = require('../middleware/auth');
  *                 example: true
  *     responses:
  *       201:
- *         description: MasterData created
+ *         description: MasterData created successfully!    
  * /api/master-data/{id}:
  *   put:
- *     summary:  update MasterData
+ *     summary:  Update master data
  *     tags: [MasterData]
  *     security:
  *       - bearerAuth: []
@@ -90,9 +90,9 @@ const { auth, checkRole } = require('../middleware/auth');
  *                 type: boolean
  *     responses:
  *       200:
- *         description: MasterData updated
+ *         description: MasterData updated successfully!
  *   delete:
- *     summary: MasterData delete karo
+ *     summary: Delete master data
  *     tags: [MasterData]
  *     security:
  *       - bearerAuth: []
@@ -104,15 +104,15 @@ const { auth, checkRole } = require('../middleware/auth');
  *           type: string
  *     responses:
  *       200:
- *         description: MasterData deleted
+ *         description: MasterData deleted successfully!
  */
 
-// GET — MasterData list
+// GET — All master data
 router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), async (req, res) => {
     try {
         let query = {};
 
-        // Type se filter karo (optional)
+        // Filter by type (optional)
         if (req.query.type) {
             const masterType = await MasterType.findOne({ code: req.query.type });
             if (masterType) {
@@ -120,11 +120,11 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
             }
         }
 
-        // Role ke hisaab se filter
+        // Filter by role
         if (req.user.role === 'super_admin') {
-            // Sabhi data
+            // See all data
         } else {
-            // Global + apne tenant ka data
+            // Global + their own data
             query.$or = [
                 { is_global: true },
                 { tenant_id: req.user.tenant_id }
@@ -135,7 +135,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
             .populate('master_type_id', 'name code')
             .sort({ sort_order: 1 });
 
-        // Language ke hisaab se name return karo
+        // Return name in user's language
         const lang = req.user.language || 'en';
         const result = masterData.map(item => {
             const obj = item.toObject();
@@ -147,13 +147,13 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
             return obj;
         });
 
-        res.json({ success: true, data: result });
+        res.json({ success: true, message: 'All master data list fetched successfully!', data: result });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// POST — Naya MasterData
+// POST — Create new master data
 router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         if (req.user.role === 'tenant_admin') {
@@ -163,13 +163,13 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res
 
         const masterData = new MasterData(req.body);
         await masterData.save();
-        res.status(201).json({ success: true, data: masterData });
+        res.status(201).json({ success: true, message: 'MasterData created successfully!', data: masterData });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
 });
 
-// PUT — MasterData update
+// PUT — Update master data
 router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const masterData = await MasterData.findByIdAndUpdate(
@@ -178,18 +178,18 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
             { new: true }
         );
         if (!masterData) return res.status(404).json({ success: false, message: 'MasterData not found!' });
-        res.json({ success: true, data: masterData });
+        res.json({ success: true, message: 'MasterData updated successfully!', data: masterData });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// DELETE — MasterData delete
+// DELETE — Delete master data
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const masterData = await MasterData.findByIdAndDelete(req.params.id);
         if (!masterData) return res.status(404).json({ success: false, message: 'MasterData not found!' });
-        res.json({ success: true, message: 'MasterData deleted!' });
+        res.json({ success: true, message: 'MasterData deleted successfully!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

@@ -7,7 +7,7 @@ const { auth, checkRole } = require('../middleware/auth');
  * @swagger
  * /api/offices:
  *   get:
- *     summary: Sabhi offices ki list
+ *     summary: All offices list
  *     tags: [Offices]
  *     security:
  *       - bearerAuth: []
@@ -15,7 +15,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Offices list
  *   post:
- *     summary: Naya office banao
+ *     summary: Create new office
  *     tags: [Offices]
  *     security:
  *       - bearerAuth: []
@@ -37,10 +37,10 @@ const { auth, checkRole } = require('../middleware/auth');
  *                 example: Connaught Place, New Delhi
  *     responses:
  *       201:
- *         description: Office created
+ *         description: Office created successfully!
  * /api/offices/{id}:
  *   put:
- *     summary: Office update karo
+ *     summary: Update office
  *     tags: [Offices]
  *     security:
  *       - bearerAuth: []
@@ -72,9 +72,9 @@ const { auth, checkRole } = require('../middleware/auth');
  *                 example: true
  *     responses:
  *       200:
- *         description: Office updated
+ *         description: Office updated successfully!
  *   delete:
- *     summary: Office delete karo
+ *     summary: Delete office
  *     tags: [Offices]
  *     security:
  *       - bearerAuth: []
@@ -87,7 +87,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         example: 6a16a9b2dab081b48816a5e4
  *     responses:
  *       200:
- *         description: Office deleted
+ *         description: Office deleted successfully!
  */
 
 
@@ -96,6 +96,7 @@ router.get('/', auth, checkRole('admin'), async (req, res) => {
         const office = await Office.find(); 
         res.json({
             success: true,
+            message: 'All offices list fetched successfully!',
             data: office
         });
     } catch (error) {
@@ -112,6 +113,7 @@ router.post('/', auth, checkRole('admin'), async (req, res) => {
         await office.save();                    
         res.status(201).json({
             success: true,
+            message: 'Office created successfully!',
             data: office                        
         });
     } catch (error) {
@@ -122,7 +124,7 @@ router.post('/', auth, checkRole('admin'), async (req, res) => {
     }
 });
 
-// PUT — Office update karo
+// PUT — Update office
 router.put('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const office = await Office.findByIdAndUpdate(
@@ -138,6 +140,7 @@ router.put('/:id', auth, checkRole('admin'), async (req, res) => {
         }
         res.json({
             success: true,
+            message: 'Office updated successfully!',
             data: office
         });
     } catch (error) {
@@ -148,7 +151,7 @@ router.put('/:id', auth, checkRole('admin'), async (req, res) => {
     }
 });
 
-// DELETE — Office delete karo
+// DELETE — Delete office
 router.delete('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const office = await Office.findByIdAndDelete(req.params.id);
@@ -160,7 +163,7 @@ router.delete('/:id', auth, checkRole('admin'), async (req, res) => {
         }
         res.json({
             success: true,
-            message: 'Office deleted!'
+            message: 'Office deleted successfully!'
         });
     } catch (error) {
         res.status(500).json({

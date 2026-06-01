@@ -7,7 +7,7 @@ const { auth, checkRole } = require('../middleware/auth');
  * @swagger
  * /api/tenants:
  *   get:
- *     summary: Sabhi tenants ki list
+ *     summary: All tenants list 
  *     tags: [Tenants]
  *     security:
  *       - bearerAuth: []
@@ -15,7 +15,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Tenants list
  *   post:
- *     summary: Naya tenant banao
+ *     summary: Create new tenant
  *     tags: [Tenants]
  *     security:
  *       - bearerAuth: []
@@ -53,7 +53,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: Tenant created
  * /api/tenants/{id}:
  *   put:
- *     summary: Tenant update karo
+ *     summary: Update tenant
  *     tags: [Tenants]
  *     security:
  *       - bearerAuth: []
@@ -83,7 +83,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Tenant updated
  *   delete:
- *     summary: Tenant delete karo
+ *     summary: Delete tenant
  *     tags: [Tenants]
  *     security:
  *       - bearerAuth: []
@@ -98,7 +98,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: Tenant deleted
  */
 
-// GET — Sabhi tenants
+// GET — All tenants
 router.get('/', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenants = await Tenant.find();
@@ -108,7 +108,7 @@ router.get('/', auth, checkRole('super_admin'), async (req, res) => {
     }
 });
 
-// POST — Naya tenant
+// POST — Create new tenant
 router.post('/', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = new Tenant(req.body);
@@ -119,7 +119,7 @@ router.post('/', auth, checkRole('super_admin'), async (req, res) => {
     }
 });
 
-// GET — Single tenant
+// GET — Get single tenant
 router.get('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = await Tenant.findById(req.params.id);
@@ -130,7 +130,7 @@ router.get('/:id', auth, checkRole('super_admin'), async (req, res) => {
     }
 });
 
-// PUT — Tenant update
+// PUT — Update tenant
 router.put('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = await Tenant.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -141,7 +141,7 @@ router.put('/:id', auth, checkRole('super_admin'), async (req, res) => {
     }
 });
 
-// DELETE — Tenant delete
+// DELETE — Delete tenant successfully!
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const tenant = await Tenant.findByIdAndDelete(req.params.id);

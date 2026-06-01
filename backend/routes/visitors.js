@@ -174,52 +174,97 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
 });
 
 // POST — Naya visitor
-router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), upload.single('photo'), async (req, res) => {
-    try {
-        let photo_url = '';
-        let face_data = '';
+router.post(
+    '/',
+    auth,
+    checkRole('super_admin', 'tenant_admin', 'receptionist'),
+    upload.single('photo'),
+    async (req, res) => {
+        try {
+            let photo_url = '';
+            let face_data = '';
 
-        if (req.file) {
-            photo_url = await uploadPhoto(req.file.buffer);
-            const base64Image = req.file.buffer.toString('base64');
-            const faceResult = await getEmbedding(base64Image);
-            if (faceResult.success) {
-                face_data = JSON.stringify(faceResult.embedding);
+            if (req.file) {
+                photo_url = await uploadPhoto(req.file.buffer);
+
+                const base64Image = req.file.buffer.toString('base64');
+                const faceResult = await getEmbedding(base64Image);
+
+                if (faceResult.success) {
+                    face_data = JSON.stringify(faceResult.embedding);
+                }
             }
+
+            // ==========================
+            // Request Body Sanitization
+            // ==========================
+            const { name, phone, id_number } = req.body;
+
+            const visitorName = name ? name.trim() : '';
+            const visitorPhone = phone ? phone.trim() : '';
+            const visitorIdNumber = id_number ? id_number.trim() : '';
+
+            console.log('Body:', req.body);
+            console.log('File:', req.file ? 'File received' : 'No file');
+
+            // Optional Validation
+            if (!visitorName || !visitorPhone || !visitorIdNumber) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Name, phone and ID number are required'
+                });
+            }
+
+            // ==========================
+            // Audit Log
+            // ==========================
+            await createAuditLog({
+                user_id: req.user.id,
+                user_email: req.user.email,
+                action: 'CREATE',
+                module: 'visitor',
+                description: `New visitor added: ${visitorName}`,
+                ip_address: req.ip,
+                status: 'success',
+                tenant_id: req.user.tenant_id,
+                metadata: {
+                    visitor_name: visitorName,
+                    phone: visitorPhone,
+                    id_number: visitorIdNumber
+                }
+            });
+
+            // ==========================
+            // Create Visitor
+            // ==========================
+            const visitor = new Visitor({
+                name: visitorName,
+                phone: visitorPhone,
+                id_number: visitorIdNumber,
+                photo_url,
+                face_data,
+                tenant_id: req.user.tenant_id,
+                realm_id: req.user.realm_id
+            });
+
+            await visitor.save();
+
+            res.status(201).json({
+                success: true,
+                data: visitor
+            });
+
+        } catch (error) {
+            console.error('Create Visitor Error:', error);
+
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
         }
-
-        await createAuditLog({
-            user_id: req.user.id,
-            user_email: req.user.email,
-            action: 'CREATE',
-            module: 'visitor',
-            description: `Naya visitor add kiya: ${name}`,
-            ip_address: req.ip,
-            status: 'success',
-            tenant_id: req.user.tenant_id,
-            metadata: { visitor_name: name, phone }
-        });
-
-        const { name, phone, id_number } = req.body;
-
-        const visitor = new Visitor({
-            name,
-            phone,
-            id_number,
-            photo_url,
-            face_data,
-            tenant_id: req.user.tenant_id,
-            realm_id: req.user.realm_id
-        });
-
-        await visitor.save();
-        res.status(201).json({ success: true, data: visitor });
-    } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
     }
-});
-
-// POST — Face identify
+);
+// POST — Face recognition
 router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), upload.single('photo'), async (req, res) => {
     try {
         const base64Image = req.file.buffer.toString('base64');
@@ -228,7 +273,7 @@ router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'recepti
         if (!faceResult.success) {
             return res.status(400).json({
                 success: false,
-                message: 'Chehra nahi mila!'
+                message: 'Face not detected!'
             });
         }
 
@@ -260,7 +305,7 @@ router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'recepti
                     found: true,
                     blacklisted: true,
                     visitor: matchedVisitor,
-                    message: `⚠️ ALERT! ${matchedVisitor.name} blacklisted hai!`
+                    message: `⚠️ ALERT! ${matchedVisitor.name} blacklisted!`
                 });
             }
             return res.json({
@@ -272,7 +317,7 @@ router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'recepti
             });
         }
 
-        res.json({ success: true, found: false, message: 'Naya visitor hai!' });
+        res.json({ success: true, found: false, message: 'New visitor found!' });
 
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -287,7 +332,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
             req.body,
             { new: true }
         );
-        if (!visitor) return res.status(404).json({ success: false, message: 'Visitor nahi mila!' });
+        if (!visitor) return res.status(404).json({ success: false, message: 'Visitor not found!' });
         res.json({ success: true, data: visitor });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -298,8 +343,8 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const visitor = await Visitor.findByIdAndDelete(req.params.id);
-        if (!visitor) return res.status(404).json({ success: false, message: 'Visitor nahi mila!' });
-        res.json({ success: true, message: 'Visitor delete ho gaya!' });
+        if (!visitor) return res.status(404).json({ success: false, message: 'Visitor not found!' });
+        res.json({ success: true, message: 'Visitor deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

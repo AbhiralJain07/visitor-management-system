@@ -8,7 +8,7 @@ const { auth, checkRole } = require('../middleware/auth');
  * @swagger
  * /api/users:
  *   get:
- *     summary: Users ki list
+ *     summary: All users list
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -16,7 +16,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: Users list
  *   post:
- *     summary: Naya user banao
+ *     summary: Create new user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -58,7 +58,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: User created
  * /api/users/{id}:
  *   put:
- *     summary: User update karo
+ *     summary: Update user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -91,7 +91,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *       200:
  *         description: User updated
  *   delete:
- *     summary: User delete karo
+*     summary: Delete user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -111,18 +111,18 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res)
     try {
         let query = {};
 
-        // Tenant admin sirf apne users dekhe
+        // Tenant admin only see their own users
         if (req.user.role === 'tenant_admin') {
             query.tenant_id = req.user.tenant_id;
         }
 
-        // Realm filter (agar realm_id hai)
+        // Realm filter (if realm_id is provided)
         if (req.user.realm_id) {
             query.realm_id = req.user.realm_id;
         }
 
         const users = await User.find(query)
-            .select('-password') // Password mat bhejo!
+            .select('-password') // Password don't send
             .populate('tenant_id', 'name code')
             .populate('realm_id', 'name code');
 
@@ -132,26 +132,26 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res)
     }
 });
 
-// POST — Naya user
+// POST — Create new user
 router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const { name, email, password, role, tenant_id, realm_id, department, language } = req.body;
 
-        // Tenant admin sirf apne tenant mein user bana sakta hai
+        // Tenant admin can only create users in their own tenant
         const finalTenantId = req.user.role === 'tenant_admin'
             ? req.user.tenant_id
             : tenant_id;
 
-        // Email already exist karti hai kya?
+        // Email already exists in this tenant!
         const existing = await User.findOne({ email, tenant_id: finalTenantId });
         if (existing) {
             return res.status(400).json({
                 success: false,
-                message: 'email already registered!'
+                message: 'Email already registered in this tenant!'
             });
         }
 
-        // Password encrypt karo
+        // Password hash
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = new User({
@@ -167,7 +167,7 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res
 
         await user.save();
 
-        // Password response mein mat bhejo
+        // Password response don't send
         const userResponse = user.toObject();
         delete userResponse.password;
 
@@ -177,10 +177,10 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin'), async (req, res
     }
 });
 
-// PUT — User update
+// PUT — Update user
 router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
-        // Password update hone se bachao
+        // Password update don't update
         delete req.body.password;
 
         const user = await User.findByIdAndUpdate(
@@ -196,7 +196,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
     }
 });
 
-// DELETE — User delete
+// DELETE — Delete user
 router.delete('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id);
@@ -211,7 +211,7 @@ router.delete('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req
  * @swagger
  * /api/users/language:
  *   put:
- *     summary: Apni language updated
+ *     summary: Update language
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -242,7 +242,7 @@ router.put('/language', auth, async (req, res) => {
 
         res.json({
             success: true,
-            message: `Language ${language} selected!`,
+            message: `Language updated to ${language}!`,
             data: user
         });
     } catch (error) {

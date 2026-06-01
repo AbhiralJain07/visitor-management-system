@@ -11,7 +11,7 @@ const { createAuditLog } = require('../middleware/auditLog');
  * @swagger
  * /api/visits:
  *   get:
- *     summary: Sabhi visits ki list
+ *     summary: All visits list
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
@@ -19,7 +19,7 @@ const { createAuditLog } = require('../middleware/auditLog');
  *       200:
  *         description: Visits list
  *   post:
- *     summary: Naya visit banao
+ *     summary: Create new visit
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
@@ -50,7 +50,7 @@ const { createAuditLog } = require('../middleware/auditLog');
  *         description: Visit created
  * /api/visits/{id}:
  *   put:
- *     summary: Visit update karo
+ *     summary: Update visit
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
@@ -78,7 +78,7 @@ const { createAuditLog } = require('../middleware/auditLog');
  *       200:
  *         description: Visit updated
  *   delete:
- *     summary: Visit delete karo
+ *     summary: Delete visit
  *     tags: [Visits]
  *     security:
  *       - bearerAuth: []
@@ -106,7 +106,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', '
             query.realm_id = req.user.realm_id;
         }
 
-        // Employee sirf apni visits dekhe
+        // Employee only see their own visits
         if (req.user.role === 'employee') {
             query.host_id = req.user.id;
         }
@@ -124,7 +124,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', '
     }
 });
 
-// POST — Naya visit
+// POST — Create new visit
 router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), async (req, res) => {
     try {
         const { visitor_id, host_id, purpose, purpose_id } = req.body;
@@ -135,8 +135,8 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'),
             purpose,
             purpose_id,
             office_id: req.user.realm_id,
-            tenant_id: req.user.tenant_id,  // ← token se!
-            realm_id: req.user.realm_id      // ← token se!
+            tenant_id: req.user.tenant_id,  // from token
+            realm_id: req.user.realm_id      // from token
         });
 
         await createAuditLog({
@@ -144,7 +144,7 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'),
             user_email: req.user.email,
             action: 'CREATE',
             module: 'visit',
-            description: `Naya visit create kiya`,
+            description: `New visit created`,
             ip_address: req.ip,
             status: 'success',
             tenant_id: req.user.tenant_id,
@@ -159,14 +159,14 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'),
 
         if (host && host.telegram_id) {
             const message = `
-🔔 Naya Visitor Aaya Hai!
+🔔 New Visitor Arrived!
 
 👤 Visitor: ${visitor ? visitor.name : 'Unknown'}
-📞 Phone: ${visitor ? visitor.phone : 'N/A'}
+📞 Phone: ${visitor ? visitor.phone : 'N/A'} 
 🎯 Purpose: ${purpose}
 ⏰ Time: ${new Date().toLocaleString('en-IN')}
 
-Approve karne ke liye system mein jaao!`;
+Approve the visit!`;
             await sendMessage(host.telegram_id, message);
         }
 
@@ -184,7 +184,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'
             req.body,
             { new: true }
         );
-        if (!visit) return res.status(404).json({ success: false, message: 'Visit nahi mili!' });
+        if (!visit) return res.status(404).json({ success: false, message: 'Visit not found!' });
         res.json({ success: true, data: visit });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -195,8 +195,8 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'
 router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
     try {
         const visit = await Visit.findByIdAndDelete(req.params.id);
-        if (!visit) return res.status(404).json({ success: false, message: 'Visit nahi mili!' });
-        res.json({ success: true, message: 'Visit delete ho gayi!' });
+        if (!visit) return res.status(404).json({ success: false, message: 'Visit not found!' });
+        res.json({ success: true, message: 'Visit deleted!' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
