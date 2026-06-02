@@ -41,13 +41,16 @@ const { auth, checkRole } = require('../middleware/auth');
  *               plan:
  *                 type: string
  *                 enum: [basic, professional, enterprise]
- *                 example: enterprise
+ *                 example: basic, professional, enterprise (anyone can be selected)
  *               address:
  *                 type: string
  *                 example: TCS House, Raveline Street
  *               city:
  *                 type: string
  *                 example: Mumbai
+ *               country:
+ *                 type: string
+ *                 example: India
  *     responses:
  *       201:
  *         description: Tenant created

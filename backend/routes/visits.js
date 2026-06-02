@@ -101,24 +101,52 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', '
         if (req.user.role !== 'super_admin') {
             query.tenant_id = req.user.tenant_id;
         }
-
         if (req.user.realm_id) {
             query.realm_id = req.user.realm_id;
         }
-
-        // Employee only see their own visits
         if (req.user.role === 'employee') {
             query.host_id = req.user.id;
         }
+
+        // Filter by status
+        if (req.query.status) {
+            query.status = req.query.status;
+        }
+
+        // Filter by date
+        if (req.query.date) {
+            const date = new Date(req.query.date);
+            const nextDay = new Date(date);
+            nextDay.setDate(date.getDate() + 1);
+            query.check_in = { $gte: date, $lt: nextDay };
+        }
+
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const total = await Visit.countDocuments(query);
 
         const visits = await Visit.find(query)
             .populate('visitor_id', 'name phone photo_url')
             .populate('host_id', 'name email department')
             .populate('tenant_id', 'name code')
             .populate('realm_id', 'name code')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.json({ success: true, data: visits });
+        res.json({
+            success: true,
+            data: visits,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
