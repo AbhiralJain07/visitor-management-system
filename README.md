@@ -63,24 +63,51 @@ Visitor
 
 ## Project Structure
 
-server/
-└── src/
-    ├── modules/
-    │   ├── auth/
-    │   ├── visitors/
-    │   ├── employees/
-    │   ├── visits/
-    │   ├── offices/
-    │   ├── notifications/
-    │   └── audit-logs/
-    │
-    ├── shared/
-    │   ├── middlewares/
-    │   ├── utils/
-    │   └── constants/
-    │
-    ├── config/
-    └── app.js
+```bash
+visitor-management-system/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   ├── routes/
+│   │   └── utils/
+│   │
+│   └── public/
+│
+├── backend/
+│   ├── src/
+│   │   ├── modules/
+│   │   │   ├── auth/
+│   │   │   ├── visitors/
+│   │   │   ├── employees/
+│   │   │   ├── visits/
+│   │   │   ├── offices/
+│   │   │   ├── notifications/
+│   │   │   └── audit-logs/
+│   │   │
+│   │   ├── shared/
+│   │   │   ├── middlewares/
+│   │   │   ├── utils/
+│   │   │   └── constants/
+│   │   │
+│   │   ├── config/
+│   │   └── app.js
+│   │
+│   └── server.js
+│
+├── face-service/
+│   ├── models/
+│   ├── recognition/
+│   └── app.py
+│
+├── docs/
+├── .env.example
+├── package.json
+└── README.md
+```
 
 ## Future Enhancements
 
