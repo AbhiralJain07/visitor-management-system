@@ -64,16 +64,23 @@ Visitor
 ## Project Structure
 
 server/
-├── controllers/
-├── routes/
-├── models/
-├── middlewares/
-├── services/
-
-client/
-├── components/
-├── pages/
-├── services/
+└── src/
+    ├── modules/
+    │   ├── auth/
+    │   ├── visitors/
+    │   ├── employees/
+    │   ├── visits/
+    │   ├── offices/
+    │   ├── notifications/
+    │   └── audit-logs/
+    │
+    ├── shared/
+    │   ├── middlewares/
+    │   ├── utils/
+    │   └── constants/
+    │
+    ├── config/
+    └── app.js
 
 ## Future Enhancements
 
