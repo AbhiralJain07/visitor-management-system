@@ -1,8 +1,16 @@
+// src/features/offices/api/index.ts — replace karo
 import { httpClient } from '@/api/client';
 import { type ApiResponse, type Office } from '@/types/api.types';
 
-export const getOffices = async (): Promise<ApiResponse<Office[]>> => {
-  const response = await httpClient.get<ApiResponse<Office[]>>('/offices');
+export interface GetOfficesParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  is_active?: boolean | 'all';
+}
+
+export const getOffices = async (params?: GetOfficesParams): Promise<any> => {
+  const response = await httpClient.get('/offices', { params });
   return response.data;
 };
 
