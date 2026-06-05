@@ -34,20 +34,20 @@ export const ApprovalsPage: React.FC = () => {
       if (isOnline) {
         try {
           const response = await getVisits();
-          if (response.success && response.data) {
-            // Bulk cache in local DB
-            await db.visits.clear();
-            await db.visits.bulkPut(
-              response.data.map((v) => ({
-                ...v,
-                id: v._id,
-                visitor_id: typeof v.visitor_id === 'object' && v.visitor_id !== null ? (v.visitor_id as any)._id : v.visitor_id,
-                host_id: typeof v.host_id === 'object' && v.host_id !== null ? (v.host_id as any)._id : v.host_id,
-                office_id: typeof v.office_id === 'object' && v.office_id !== null ? (v.office_id as any)._id : v.office_id,
-                localOnly: 0,
-              }))
-            );
-          }
+if (response.success) {
+  const visitsArray = Array.isArray(response.data) ? response.data : response.data?.data || [];
+  await db.visits.clear();
+  await db.visits.bulkPut(
+    visitsArray.map((v: any) => ({
+      ...v,
+      id: v._id,
+      visitor_id: typeof v.visitor_id === 'object' && v.visitor_id !== null ? v.visitor_id._id : v.visitor_id,
+      host_id: typeof v.host_id === 'object' && v.host_id !== null ? v.host_id._id : v.host_id,
+      office_id: typeof v.office_id === 'object' && v.office_id !== null ? v.office_id._id : v.office_id,
+      localOnly: 0,
+    }))
+  );
+}
         } catch (apiErr) {
           console.warn('API fetch failed, reading cached approvals:', apiErr);
         }
