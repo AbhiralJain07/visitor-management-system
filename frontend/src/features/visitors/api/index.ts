@@ -1,34 +1,23 @@
 import { httpClient } from '@/api/client';
-import { type ApiResponse, type Visitor } from '@/types/api.types';
+import { type Visitor } from '@/types/api.types';
 
-export const getVisitors = async (): Promise<ApiResponse<Visitor[]>> => {
-  const response = await httpClient.get<ApiResponse<Visitor[]>>('/visitors');
-  return response.data;
-};
+export interface GetVisitorsParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  is_blacklisted?: boolean;
+}
 
-export const getVisitorById = async (id: string): Promise<ApiResponse<Visitor>> => {
-  const response = await httpClient.get<ApiResponse<Visitor>>(`/visitors/${id}`);
-  return response.data;
-};
-
-export const createVisitor = async (formData: FormData): Promise<ApiResponse<Visitor>> => {
-  const response = await httpClient.post<ApiResponse<Visitor>>('/visitors', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
-};
-
-export const updateVisitor = async (id: string, payload: Partial<Visitor>): Promise<ApiResponse<Visitor>> => {
-  const response = await httpClient.put<ApiResponse<Visitor>>(`/visitors/${id}`, payload);
-  return response.data;
-};
-
-export const deleteVisitor = async (id: string): Promise<ApiResponse<{ message: string }>> => {
-  const response = await httpClient.delete<ApiResponse<{ message: string }>>(`/visitors/${id}`);
-  return response.data;
-};
+export interface GetVisitorsResponse {
+  success: boolean;
+  data: Visitor[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
 
 export interface IdentifyResponse {
   success: boolean;
@@ -39,11 +28,36 @@ export interface IdentifyResponse {
   message: string;
 }
 
+// ✅ Params support ke saath
+export const getVisitors = async (params?: GetVisitorsParams): Promise<GetVisitorsResponse> => {
+  const response = await httpClient.get<GetVisitorsResponse>('/visitors', { params });
+  return response.data;
+};
+
+// ✅ Create — multipart/form-data (photo support)
+export const createVisitor = async (formData: FormData): Promise<{ success: boolean; data: Visitor }> => {
+  const response = await httpClient.post('/visitors', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
+// ✅ Update
+export const updateVisitor = async (id: string, payload: Partial<Visitor>): Promise<{ success: boolean; data: Visitor }> => {
+  const response = await httpClient.put(`/visitors/${id}`, payload);
+  return response.data;
+};
+
+// ✅ Delete — only super_admin
+export const deleteVisitor = async (id: string): Promise<{ success: boolean; message: string }> => {
+  const response = await httpClient.delete(`/visitors/${id}`);
+  return response.data;
+};
+
+// ✅ Face identify
 export const identifyVisitor = async (photoFormData: FormData): Promise<IdentifyResponse> => {
-  const response = await httpClient.post<IdentifyResponse>('/visitors/identify', photoFormData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+  const response = await httpClient.post('/visitors/identify', photoFormData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 };

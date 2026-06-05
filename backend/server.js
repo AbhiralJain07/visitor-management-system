@@ -33,6 +33,10 @@ const loginLimiter = rateLimit({
 app.use(globalLimiter); // ← app ke baad!
 app.use(cors());
 app.use(express.json());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'], // Vite default port
+  credentials: true
+}));
 
 // Swagger Setup
 const swaggerOptions = {
@@ -87,12 +91,12 @@ app.use('/api/audit-logs', auditLogRoutes);
 
 // Test route
 app.get('/', (req, res) => {
-    res.send('VMS Server chal raha hai! 🚀');
+    res.send('VMS Server is running!');
 });
 
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
-        console.log('Database connected! ✅');
+        console.log('Database connected!');
     })
     .catch((error) => {
         console.log('Database error:', error);
@@ -100,5 +104,5 @@ mongoose.connect(process.env.MONGODB_URI)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server ${PORT} pe chal raha hai! 🚀`);
+    console.log(`Server ${PORT} is running! 🚀`);
 });

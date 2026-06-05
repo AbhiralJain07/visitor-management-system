@@ -1,46 +1,28 @@
+// src/features/auth/hooks/useAuth.ts
 import { useState } from 'react';
-import { loginUser } from '../api';
+import { httpClient } from '@/api/client';
 import { useAuthStore } from '@/store/authStore';
-import axios from 'axios';
 
 export const useAuth = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login: storeLogin, logout: storeLogout, user, isAuthenticated } = useAuthStore();
+  const { login } = useAuthStore();
 
-  const loginMutate = async (payload: Record<string, string>): Promise<boolean> => {
+  const loginMutate = async ({ email, password }: { email: string; password: string }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await loginUser(payload);
-      if (response.success && response.token && response.employee) {
-        storeLogin(response.employee, response.token);
-        return true;
-      } else {
-        setError(response.message || 'Authentication failed. Please verify credentials.');
-        return false;
-      }
+      const res = await httpClient.post('/auth/login', { email, password });
+      const { token, user } = res.data; // backend se aata hai
+      login(user, token); // authStore mein save hoga
+      return true;
     } catch (err: any) {
-      console.error('Login error details:', err);
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || 'Invalid email or password.');
-      } else {
-        setError('A connection error occurred. Please try again.');
-      }
+      setError(err.response?.data?.message || 'Login failed!');
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  return {
-    loginMutate,
-    isLoading,
-    error,
-    logout: storeLogout,
-    user,
-    isAuthenticated,
-  };
+  return { loginMutate, isLoading, error };
 };
-
-export default useAuth;

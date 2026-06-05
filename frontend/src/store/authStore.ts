@@ -5,7 +5,7 @@ export interface UserSession {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'receptionist' | 'employee' | 'security' | 'super_admin' | 'support_admin' | 'auditor' | 'manager';
+   role: 'super_admin' | 'support_admin' | 'auditor' | 'admin' | 'manager' | 'receptionist' | 'security' | 'employee';
 }
 
 interface AuthState {
