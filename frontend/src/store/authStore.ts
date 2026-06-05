@@ -5,7 +5,11 @@ export interface UserSession {
   id: string;
   name: string;
   email: string;
-   role: 'super_admin' | 'support_admin' | 'auditor' | 'admin' | 'manager' | 'receptionist' | 'security' | 'employee';
+  role: 'super_admin' | 'support_admin' | 'auditor' | 'admin' | 
+        'manager' | 'receptionist' | 'security' | 'employee' | 'tenant_admin';
+  tenant_id?: string | null;
+  realm_id?: string | null;
+  language?: string;
 }
 
 interface AuthState {
