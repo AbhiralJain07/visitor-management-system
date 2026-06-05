@@ -1,8 +1,18 @@
+// src/features/employees/api/index.ts — replace karo
 import { httpClient } from '@/api/client';
 import { type ApiResponse, type Employee } from '@/types/api.types';
 
-export const getEmployees = async (): Promise<ApiResponse<Employee[]>> => {
-  const response = await httpClient.get<ApiResponse<Employee[]>>('/employees');
+export interface GetEmployeesParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  role?: string;
+  department?: string;
+  office_id?: string;
+}
+
+export const getEmployees = async (params?: GetEmployeesParams): Promise<any> => {
+  const response = await httpClient.get('/employees', { params });
   return response.data;
 };
 
