@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt", "icons.svg"],
       manifest: {
-        name: "VMS Enterprise Portal",
-        short_name: "VMS",
-        description: "Enterprise Visitor Management System with offline check-in capability",
+        name: "Atithi Enterprise Portal",
+        short_name: "Atithi",
+        description: "Enterprise Atithi Management System with offline check-in capability",
         theme_color: "#0f172a", // slate-900 color theme
         background_color: "#0f172a",
         display: "standalone",

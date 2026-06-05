@@ -4,10 +4,10 @@ import { z } from 'zod';
  * Validation schema for the Login Form
  */
 export const loginSchema = z.object({
-  email: z
+  company: z.string().optional(),
+  username: z
     .string()
-    .min(1, { message: 'Email address is required.' })
-    .email({ message: 'Please enter a valid work email address.' }),
+    .min(1, { message: 'Username is required.' }),
   password: z
     .string()
     .min(1, { message: 'Password is required.' })
@@ -16,6 +16,18 @@ export const loginSchema = z.object({
 });
 
 export type LoginFields = z.infer<typeof loginSchema>;
+
+export const registerSchema = z.object({
+  companyName: z.string().min(1, { message: 'Company name is required.' }),
+  adminName: z.string().min(1, { message: 'Admin full name is required.' }),
+  username: z.string().min(1, { message: 'Username/Email is required.' }),
+  password: z
+    .string()
+    .min(1, { message: 'Password is required.' })
+    .min(6, { message: 'Password must be at least 6 characters long.' }),
+});
+
+export type RegisterFields = z.infer<typeof registerSchema>;
 
 /**
  * Validation schema for the Forgot Password Form

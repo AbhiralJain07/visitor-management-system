@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAuthStore, type UserSession } from '@/store/authStore';
 import { AuthCard } from '@/features/auth/components/AuthCard';
 import { LoginForm } from '@/features/auth/components/LoginForm';
+import { RegisterForm } from '@/features/auth/components/RegisterForm';
 import { type LoginFields } from '@/features/auth/schemas/authSchemas';
 
 export const LoginPage: React.FC = () => {
@@ -12,10 +13,17 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [isRegister, setIsRegister] = useState(false);
+  const [showSandbox, setShowSandbox] = useState(false);
+
+  const isHindi = language === 'hi';
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (data: LoginFields) => {
-    const success = await loginMutate({ email: data.email, password: data.password });
+    // If username is an email address, use it directly. Otherwise, format it as email
+    const email = data.username.includes('@') ? data.username : `${data.username}@company.com`;
+    const success = await loginMutate({ email, password: data.password });
     if (success) {
       const currentUser = useAuthStore.getState().user;
       let targetPath = from;
@@ -156,17 +164,64 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 
+  const getTitle = () => {
+    if (isRegister) {
+      return isHindi ? 'खाता बनाएं' : 'Create Account';
+    }
+    return isHindi ? 'स्वागत है' : 'Welcome Back';
+  };
+
+  const getDescription = () => {
+    if (isRegister) {
+      return isHindi
+        ? 'अपनी कंपनी पंजीकृत करें और अतिथियों का प्रबंधन शुरू करें।'
+        : 'Register your company and start managing visitors.';
+    }
+    return isHindi
+      ? 'जारी रखने के लिए अपनी कंपनी चुनें और साइन इन करें।'
+      : 'Select your company and sign in to continue.';
+  };
+
+  const sandboxWidget = (
+    <div className="w-full border border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-900/90 backdrop-blur">
+      <button
+        type="button"
+        onClick={() => setShowSandbox(!showSandbox)}
+        className="w-full px-5 py-3 flex items-center justify-between text-left text-[10px] font-black text-slate-400 hover:text-white bg-slate-900/95 hover:bg-slate-800 transition-all select-none focus:outline-none min-h-[40px] tracking-wider"
+      >
+        <span>🛠️ DEVELOPER SANDBOX SIMULATOR</span>
+        <span>{showSandbox ? '▲ COLLAPSE' : '▼ EXPAND'}</span>
+      </button>
+      {showSandbox && (
+        <div className="p-4 border-t border-slate-800/80 max-h-[260px] overflow-y-auto custom-scrollbar">
+          {sandboxFooter}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <AuthCard
-      title="VMS Enterprise Portal"
-      description="Sign in to manage guests, office credentials, check-ins, and security policies."
-      footer={sandboxFooter}
+      title={getTitle()}
+      description={getDescription()}
+      language={language}
+      onLanguageChange={setLanguage}
+      footer={sandboxWidget}
     >
-      <LoginForm
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        apiError={error}
-      />
+      {isRegister ? (
+        <RegisterForm
+          onBackToLogin={() => setIsRegister(false)}
+          language={language}
+        />
+      ) : (
+        <LoginForm
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          apiError={error}
+          language={language}
+          onRegisterToggle={() => setIsRegister(true)}
+        />
+      )}
     </AuthCard>
   );
 };

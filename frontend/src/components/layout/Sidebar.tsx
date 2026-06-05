@@ -36,11 +36,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
         <div className="flex items-center justify-between px-4 py-5 border-b border-slate-800 min-h-[70px]">
           <div className="flex items-center space-x-3 overflow-hidden">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 shrink-0 shadow-md shadow-blue-500/20">
-              <span className="font-bold text-lg text-white">V</span>
+              <span className="font-bold text-lg text-white">A</span>
             </div>
             <div className={`flex flex-col animate-fadeIn ${textVisibility}`}>
-              <span className="font-bold text-sm leading-tight text-white uppercase tracking-wider">VMS Enterprise</span>
-              <span className="text-[10px] text-slate-400">Visitor Management</span>
+              <span className="font-bold text-sm leading-tight text-white uppercase tracking-wider">Atithi Enterprise</span>
+              <span className="text-[10px] text-slate-400">Atithi Management</span>
             </div>
           </div>
           
