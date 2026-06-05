@@ -1,8 +1,20 @@
+// src/features/visits/api/index.ts — replace karo
 import { httpClient } from '@/api/client';
 import { type ApiResponse, type Visit } from '@/types/api.types';
 
-export const getVisits = async (): Promise<ApiResponse<Visit[]>> => {
-  const response = await httpClient.get<ApiResponse<Visit[]>>('/visits');
+export interface GetVisitsParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  status?: string;
+  host_id?: string;
+  office_id?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const getVisits = async (params?: GetVisitsParams): Promise<any> => {
+  const response = await httpClient.get('/visits', { params });
   return response.data;
 };
 
