@@ -273,11 +273,15 @@ export const MasterDataPage: React.FC = () => {
     {
       header: 'Record Value',
       accessor: (row: MasterDataItem) => (
-        <div className="flex flex-col">
-          <span className="font-bold text-slate-800 text-sm leading-tight">{row.name}</span>
-          <span className="text-[9px] text-slate-400 font-semibold uppercase">{row.typeCode.replace('_', ' ')} Category</span>
-        </div>
-      ),
+  <div className="flex flex-col">
+    <span className="font-bold text-slate-800 text-sm leading-tight">{row.name}</span>
+    <span className="text-[9px] text-slate-400 font-semibold uppercase">
+      {row.typeCode?.replace('_', ' ') || 
+       (typeof row.master_type_id === 'object' ? row.master_type_id?.name : '') || 
+       'General'} Category
+    </span>
+  </div>
+),
     },
     {
       header: 'Sort Order',

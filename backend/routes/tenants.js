@@ -4,6 +4,17 @@ const router = express.Router();
 const Tenant = require('../models/Tenant');
 const { auth, checkRole } = require('../middleware/auth');
 
+router.get('/public', async (req, res) => {
+    try {
+        const tenants = await Tenant.find({ is_active: true })
+            .select('name _id')
+            .sort({ name: 1 });
+        res.json({ success: true, data: tenants });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 /**
  * @swagger
  * /api/tenants:

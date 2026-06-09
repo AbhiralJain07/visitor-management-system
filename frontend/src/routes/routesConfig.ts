@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type UserRole = 'admin' | 'receptionist' | 'employee' | 'security' | 'super_admin' | 'support_admin' | 'auditor' | 'manager';
+export type UserRole = 'admin' | 'receptionist' | 'employee' | 'security' | 'super_admin' | 'support_admin' | 'auditor' | 'manager' | 'tenant_admin';
 
 export interface RouteItem {
   path: string;

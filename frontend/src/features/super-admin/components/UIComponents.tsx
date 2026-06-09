@@ -140,7 +140,7 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const normalized = status.trim().toLowerCase();
+  const normalized = (status || '').trim().toLowerCase();
 
   let styles = 'bg-slate-50 text-slate-600 border-slate-200';
   if (normalized === 'active' || normalized === 'approved' || normalized === 'sys_active') {
@@ -153,7 +153,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm capitalize ${styles}`}>
-      {status}
+      {status || 'Unknown'}
     </span>
   );
 };

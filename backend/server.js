@@ -16,7 +16,7 @@ const globalLimiter = rateLimit({
     max: 100,
     message: {
         success: false,
-        message: 'Bahut zyada requests! 15 minute baad try karo!'
+        message: 'Too many requests! Try after 15 minutes!'
     }
 });
 

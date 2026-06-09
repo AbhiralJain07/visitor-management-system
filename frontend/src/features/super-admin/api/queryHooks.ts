@@ -277,7 +277,11 @@ export const useMasterTypes = (search = '') => {
     queryFn: async () => {
       try {
         const response = await httpClient.get('/master-types', { params: { search } });
-        return response.data.data || [];
+        const items = response.data.data || [];
+        return items.map((mt: any) => ({
+          ...mt,
+          status: mt.status || (mt.is_active ? 'Active' : 'Inactive'),
+        }));
       } catch (err) {
         console.warn('Master types API failed, using mock.');
         return mockMasterTypes.filter(
@@ -356,7 +360,15 @@ export const useMasterData = (typeCode = 'All', search = '') => {
     queryFn: async () => {
       try {
         const response = await httpClient.get('/master-data', { params: { typeCode, search } });
-        return response.data.data || [];
+        const items = response.data.data || [];
+        return items.map((item: any) => ({
+          ...item,
+          typeCode: item.master_type_id?.code || typeCode || 'GENERAL',
+          sortOrder: item.sort_order ?? item.sortOrder ?? 0,
+          status: item.status || (item.is_active ? 'Active' : 'Inactive'),
+          translations: item.translations || { en: item.name, hi: '', ta: '', te: '', mr: '', bn: '' },
+        }));
+
       } catch (err) {
         console.warn('Master data API failed, using mock.');
         return mockMasterData.filter((md) => {

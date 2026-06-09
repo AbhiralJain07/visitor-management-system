@@ -79,6 +79,11 @@ export interface MasterDataItem {
   translations: TranslationSchema;
   createdAt: string;
   updatedAt: string;
+  master_type_id?: {
+    _id: string;
+    name: string;
+    code: string;
+  } | string;
 }
 
 /**

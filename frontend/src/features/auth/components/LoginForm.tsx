@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
 import { User, KeyRound, Eye, EyeOff, Loader2, AlertCircle, Building2 } from 'lucide-react';
 import { loginSchema, type LoginFields } from '../schemas/authSchemas';
-import { useTenants } from '@/features/super-admin/api/queryHooks';
+
 
 interface LoginFormProps {
   onSubmit: (data: LoginFields) => void;
@@ -30,7 +30,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onRegisterToggle,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const { data: tenants } = useTenants();
+  const [tenants, setTenants] = useState<{_id: string, name: string}[]>([]);
+
+    useEffect(() => {
+    fetch('http://localhost:8080/api/tenants/public')
+    .then(r => r.json())
+    .then(res => { if (res.success) setTenants(res.data); })
+    .catch(() => {});
+    }, []);
 
   const isHindi = language === 'hi';
 
