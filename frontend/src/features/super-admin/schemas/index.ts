@@ -79,6 +79,7 @@ export const masterDataFormSchema = z.object({
     .regex(UPPER_CODE_REGEX, { message: 'Code must be uppercase alphanumeric and underscores only.' }),
   sortOrder: z.number().int().min(0, { message: 'Sort order must be 0 or higher.' }),
   status: z.enum(['Active', 'Inactive']),
+  typeCode: z.string().optional(),
   translations: z.object({
     en: z.string().min(1, { message: 'English translation is required.' }),
     hi: z.string().optional(),

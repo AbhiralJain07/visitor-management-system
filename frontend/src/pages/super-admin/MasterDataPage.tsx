@@ -74,6 +74,7 @@ export const MasterDataPage: React.FC = () => {
       code: '',
       sortOrder: 0,
       status: 'Active',
+      typeCode: '',
       translations: {
         en: '',
         hi: '',
@@ -105,6 +106,7 @@ export const MasterDataPage: React.FC = () => {
       code: '',
       sortOrder: masterItems.length + 1,
       status: 'Active',
+      typeCode: selectedTypeCode === 'All' ? (masterTypes[0]?.code || '') : selectedTypeCode,
       translations: {
         en: '',
         hi: '',
@@ -124,6 +126,7 @@ export const MasterDataPage: React.FC = () => {
       code: item.code,
       sortOrder: item.sortOrder,
       status: item.status,
+      typeCode: item.typeCode || '',
       translations: {
         en: item.translations.en || item.name,
         hi: item.translations.hi || '',
@@ -139,10 +142,13 @@ export const MasterDataPage: React.FC = () => {
   };
 
   const onSubmitRecordForm = async (data: MasterDataFormFields) => {
+    const selectedType = masterTypes.find(t => t.code === data.typeCode);
+
     const payload = {
       ...data,
       name: data.translations.en,
-      typeCode: selectedTypeCode === 'All' ? (masterTypes[0]?.code || 'VISITOR_TYPE') : selectedTypeCode,
+      master_type_id: selectedType?._id,
+      typeCode: data.typeCode,
     };
 
     try {
@@ -549,29 +555,120 @@ export const MasterDataPage: React.FC = () => {
               />
             </div>
 
-            <DataTable
-              columns={recordColumns}
-              data={masterItems}
-              isLoading={isItemsLoading}
-              currentPage={currentPage}
-              totalPages={1}
-              emptyState={
-                <EmptyState
-                  title="No Records Found"
-                  description="No master data entries are currently configured under this category."
-                  action={
-                    <PermissionGuard action="master_data:write">
-                      <button
-                        onClick={handleOpenAddRecordModal}
-                        className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
-                      >
-                        Create First Record
-                      </button>
-                    </PermissionGuard>
-                  }
-                />
-              }
-            />
+            {isItemsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm animate-pulse space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 bg-slate-100 rounded w-16"></div>
+                        <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+                      </div>
+                      <div className="h-5 bg-slate-100 rounded-full w-14"></div>
+                    </div>
+                    <div className="h-px bg-slate-100"></div>
+                    <div className="flex justify-between items-center pt-1">
+                      <div className="h-4 bg-slate-100 rounded w-20"></div>
+                      <div className="h-6 bg-slate-100 rounded w-16"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : masterItems.length === 0 ? (
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                <div className="min-h-[300px] flex items-center justify-center p-8">
+                  <EmptyState
+                    title="No Records Found"
+                    description="No master data entries are currently configured under this category."
+                    action={
+                      <PermissionGuard action="master_data:write">
+                        <button
+                          onClick={handleOpenAddRecordModal}
+                          className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
+                        >
+                          Create First Record
+                        </button>
+                      </PermissionGuard>
+                    }
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-fadeIn">
+                {masterItems.map((item) => (
+                  <div key={item._id} className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 group">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1">
+                        <span className="font-mono text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-100/50 px-2 py-0.5 rounded-md uppercase">
+                          {item.code}
+                        </span>
+                        <h4 className="font-bold text-slate-800 text-sm leading-tight pt-1">{item.name}</h4>
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">
+                          {item.typeCode.replace('_', ' ')} Category
+                        </span>
+                      </div>
+                      <StatusBadge status={item.status} />
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-slate-100/60 pt-3 text-xs select-none">
+                      <div className="flex items-center gap-1.5 text-slate-400 font-bold">
+                        <span className="text-[9px] bg-slate-50 border border-slate-200/50 text-slate-500 px-2 py-0.5 rounded-md font-mono">
+                          #{item.sortOrder}
+                        </span>
+                        {(() => {
+                          const pct = getCompletenessPercent(item.translations);
+                          const badgeColor =
+                            pct === 100
+                              ? 'text-green-700 bg-green-50 border-green-100/80'
+                              : pct >= 50
+                              ? 'text-amber-700 bg-amber-50 border-amber-100/80'
+                              : 'text-red-700 bg-red-50 border-red-100/80';
+                          return (
+                            <span className={`text-[9px] font-bold px-2 py-0.5 border rounded-md ${badgeColor}`}>
+                              {getCompletenessText(item.translations)} translations
+                            </span>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1.5 opacity-85 group-hover:opacity-100 transition-opacity">
+                        <PermissionGuard action="master_data:write">
+                          <button
+                            onClick={() => handleOpenEditRecordModal(item)}
+                            className="p-1 border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors shadow-2xs"
+                            title="Edit Record"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleRecordStatus(item)}
+                            className={`p-1 border rounded-lg transition-colors shadow-2xs ${
+                              item.status === 'Active'
+                                ? 'border-red-100 bg-white text-red-600 hover:bg-red-50'
+                                : 'border-green-100 bg-white text-green-600 hover:bg-green-50'
+                            }`}
+                            title={item.status === 'Active' ? 'Deactivate Record' : 'Activate Record'}
+                          >
+                            {item.status === 'Active' ? <ShieldX size={13} /> : <Check size={13} />}
+                          </button>
+                        </PermissionGuard>
+
+                        <PermissionGuard action="master_data:delete">
+                          <button
+                            onClick={() => setRecordDeleteConfirmId(item._id)}
+                            className="p-1 border border-red-100 rounded-lg bg-white text-red-600 hover:bg-red-50 hover:border-red-100/60 transition-colors shadow-2xs"
+                            title="Delete Record"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </PermissionGuard>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -588,27 +685,99 @@ export const MasterDataPage: React.FC = () => {
             />
           </div>
 
-          <DataTable
-            columns={categoryColumns}
-            data={masterTypesForTab}
-            isLoading={isTypesLoading}
-            emptyState={
-              <EmptyState
-                title="No Categories Configured"
-                description="Create a master category code block to begin referencing custom metadata profiles."
-                action={
-                  <PermissionGuard action="master_types:write">
-                    <button
-                      onClick={handleOpenAddCategoryModal}
-                      className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
-                    >
-                      Create First Category
-                    </button>
-                  </PermissionGuard>
-                }
-              />
-            }
-          />
+          {isTypesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm animate-pulse space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2 flex-1">
+                      <div className="h-3 bg-slate-100 rounded w-16"></div>
+                      <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+                    </div>
+                    <div className="h-5 bg-slate-100 rounded-full w-14"></div>
+                  </div>
+                  <div className="h-10 bg-slate-50 rounded w-full"></div>
+                  <div className="h-px bg-slate-100"></div>
+                  <div className="flex justify-end gap-1.5 pt-1">
+                    <div className="h-7 w-7 bg-slate-100 rounded-lg"></div>
+                    <div className="h-7 w-7 bg-slate-100 rounded-lg"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : masterTypesForTab.length === 0 ? (
+            <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+              <div className="min-h-[300px] flex items-center justify-center p-8">
+                <EmptyState
+                  title="No Categories Configured"
+                  description="Create a master category code block to begin referencing custom metadata profiles."
+                  action={
+                    <PermissionGuard action="master_types:write">
+                      <button
+                        onClick={handleOpenAddCategoryModal}
+                        className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
+                      >
+                        Create First Category
+                      </button>
+                    </PermissionGuard>
+                  }
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fadeIn">
+              {masterTypesForTab.map((type) => (
+                <div key={type._id} className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 group">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1">
+                      <span className="font-mono text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-md uppercase">
+                        {type.code}
+                      </span>
+                      <h4 className="font-bold text-slate-800 text-sm leading-tight pt-1">{type.name}</h4>
+                    </div>
+                    <StatusBadge status={type.status} />
+                  </div>
+
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2" title={type.description}>
+                    {type.description || 'No description provided.'}
+                  </p>
+
+                  <div className="flex items-center justify-end border-t border-slate-100/60 pt-3 gap-1.5 opacity-85 group-hover:opacity-100 transition-opacity">
+                    <PermissionGuard action="master_types:write">
+                      <button
+                        onClick={() => handleOpenEditCategoryModal(type)}
+                        className="p-1 border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors shadow-2xs"
+                        title="Edit Category"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button
+                        onClick={() => handleToggleCategoryStatus(type)}
+                        className={`p-1 rounded-lg border transition-colors shadow-2xs ${
+                          type.status === 'Active'
+                            ? 'border-red-100 bg-white text-red-600 hover:bg-red-50'
+                            : 'border-green-100 bg-white text-green-600 hover:bg-green-50'
+                        }`}
+                        title={type.status === 'Active' ? 'Deactivate Category' : 'Activate Category'}
+                      >
+                        {type.status === 'Active' ? <ShieldX size={13} /> : <Check size={13} />}
+                      </button>
+                    </PermissionGuard>
+
+                    <PermissionGuard action="master_types:delete">
+                      <button
+                        onClick={() => setCategoryDeleteConfirmId(type._id)}
+                        className="p-1 border border-red-100 rounded-lg bg-white text-red-600 hover:bg-red-50 hover:border-red-100/60 transition-colors shadow-2xs"
+                        title="Delete Category"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </PermissionGuard>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -635,10 +804,20 @@ export const MasterDataPage: React.FC = () => {
             <form onSubmit={recordForm.handleSubmit(onSubmitRecordForm)} className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-500 block">Adding to Category</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 capitalize">
-                    {selectedTypeCode === 'All' ? (masterTypes[0]?.name || 'Visitor Type') : selectedTypeCode.replace('_', ' ')}
-                  </div>
+                  <label className="text-xs font-semibold text-slate-700 block">
+                    Select Category
+                  </label>
+                  <select
+                    {...recordForm.register('typeCode')}
+                    disabled={isRecordEditMode}
+                    className="w-full text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer disabled:opacity-60"
+                  >
+                    {masterTypes.map((type) => (
+                      <option key={type._id} value={type.code}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-1">
