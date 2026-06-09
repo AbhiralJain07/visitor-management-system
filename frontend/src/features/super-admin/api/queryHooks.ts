@@ -10,7 +10,7 @@ import {
 } from '../types';
 
 /* ==========================================================
-   HIGH FIDELITY SEED DATA (MOCK CACHE BACKING)
+   MOCK FALLBACK DATA (used only when backend fails)
    ========================================================== */
 
 let mockTenants: TenantCompany[] = [
@@ -97,162 +97,55 @@ let mockTenants: TenantCompany[] = [
 ];
 
 let mockMasterTypes: MasterType[] = [
-  {
-    _id: 'mt1',
-    name: 'Visitor Type',
-    code: 'VISITOR_TYPE',
-    description: 'Categories of guests visiting office premises',
-    status: 'Active',
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'mt2',
-    name: 'Purpose Of Visit',
-    code: 'PURPOSE_OF_VISIT',
-    description: 'Official reasons for requesting entry authorization',
-    status: 'Active',
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'mt3',
-    name: 'ID Proof Type',
-    code: 'ID_PROOF_TYPE',
-    description: 'Acceptable identification cards for front-desk audit verification',
-    status: 'Active',
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'mt4',
-    name: 'Department',
-    code: 'DEPARTMENT',
-    description: 'Internal corporate departments',
-    status: 'Active',
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
+  { _id: 'mt1', name: 'Visitor Type', code: 'VISITOR_TYPE', description: 'Categories of guests visiting office premises', status: 'Active', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'mt2', name: 'Purpose Of Visit', code: 'PURPOSE_OF_VISIT', description: 'Official reasons for requesting entry authorization', status: 'Active', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'mt3', name: 'ID Proof Type', code: 'ID_PROOF_TYPE', description: 'Acceptable identification cards for front-desk audit verification', status: 'Active', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'mt4', name: 'Department', code: 'DEPARTMENT', description: 'Internal corporate departments', status: 'Active', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
 ];
 
 let mockMasterData: MasterDataItem[] = [
-  {
-    _id: 'md1',
-    name: 'General Guest',
-    code: 'GUEST',
-    typeCode: 'VISITOR_TYPE',
-    sortOrder: 1,
-    status: 'Active',
-    translations: { en: 'General Guest', hi: 'सामान्य अतिथि', ta: 'பொது விருந்தினர்', te: 'సాధారణ అతిథి', mr: 'सामान्य अतिथी', bn: 'সাধারণ অতিথি' },
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'md2',
-    name: 'Vendor Partner',
-    code: 'VENDOR',
-    typeCode: 'VISITOR_TYPE',
-    sortOrder: 2,
-    status: 'Active',
-    translations: { en: 'Vendor Partner', hi: 'विक्रेता भागीदार', ta: 'விற்பனையாளர் பங்குதாரர்', te: 'విక్రేత భాగస్వామి' },
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'md3',
-    name: 'Interview Candidate',
-    code: 'CANDIDATE',
-    typeCode: 'VISITOR_TYPE',
-    sortOrder: 3,
-    status: 'Active',
-    translations: { en: 'Interview Candidate', hi: 'साक्षात्कार उम्मीदवार', ta: 'நேர்காணல் வேட்பாளர்' },
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'md4',
-    name: 'Business Meeting',
-    code: 'MEETING',
-    typeCode: 'PURPOSE_OF_VISIT',
-    sortOrder: 1,
-    status: 'Active',
-    translations: { en: 'Business Meeting', hi: 'व्यावसायिक बैठक', ta: 'வணிக சந்திப்பு', te: 'వ్యాపార సమావేశం' },
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'md5',
-    name: 'Aadhaar Card',
-    code: 'AADHAAR',
-    typeCode: 'ID_PROOF_TYPE',
-    sortOrder: 1,
-    status: 'Active',
-    translations: { en: 'Aadhaar Card', hi: 'आधार कार्ड', ta: 'ஆதார் அட்டை', te: 'ఆధార్ కార్డ్', mr: 'आधार कार्ड', bn: 'আধার কার্ড' },
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
-  {
-    _id: 'md6',
-    name: 'PAN Card',
-    code: 'PAN_CARD',
-    typeCode: 'ID_PROOF_TYPE',
-    sortOrder: 2,
-    status: 'Active',
-    translations: { en: 'PAN Card', hi: 'पैन कार्ड', ta: 'பான் அட்டை' },
-    createdAt: '2025-01-01T00:00:00Z',
-    updatedAt: '2025-01-01T00:00:00Z',
-  },
+  { _id: 'md1', name: 'General Guest', code: 'GUEST', typeCode: 'VISITOR_TYPE', sortOrder: 1, status: 'Active', translations: { en: 'General Guest', hi: 'सामान्य अतिथि' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md2', name: 'Vendor Partner', code: 'VENDOR', typeCode: 'VISITOR_TYPE', sortOrder: 2, status: 'Active', translations: { en: 'Vendor Partner', hi: 'विक्रेता भागीदार' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md3', name: 'Interview Candidate', code: 'CANDIDATE', typeCode: 'VISITOR_TYPE', sortOrder: 3, status: 'Active', translations: { en: 'Interview Candidate', hi: 'साक्षात्कार उम्मीदवार' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md4', name: 'Business Meeting', code: 'MEETING', typeCode: 'PURPOSE_OF_VISIT', sortOrder: 1, status: 'Active', translations: { en: 'Business Meeting', hi: 'व्यावसायिक बैठक' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md5', name: 'Aadhaar Card', code: 'AADHAAR', typeCode: 'ID_PROOF_TYPE', sortOrder: 1, status: 'Active', translations: { en: 'Aadhaar Card', hi: 'आधार कार्ड' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md6', name: 'PAN Card', code: 'PAN_CARD', typeCode: 'ID_PROOF_TYPE', sortOrder: 2, status: 'Active', translations: { en: 'PAN Card', hi: 'पैन कार्ड' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
 ];
 
 const mockAnalytics: GlobalAnalytics = {
-  stats: {
-    totalCompanies: 24,
-    activeCompanies: 19,
-    totalVisitors: 8432,
-    visitsToday: 154,
-    activeUsers: 843,
-    monthlyGrowthPercent: 12.8,
-  },
-  companyGrowth: [
-    { month: 'Dec 2025', companies: 15 },
-    { month: 'Jan 2026', companies: 18 },
-    { month: 'Feb 2026', companies: 20 },
-    { month: 'Mar 2026', companies: 22 },
-    { month: 'Apr 2026', companies: 23 },
-    { month: 'May 2026', companies: 24 },
-  ],
-  visitorTrend: [
-    { date: '25 May', visits: 110 },
-    { date: '26 May', visits: 135 },
-    { date: '27 May', visits: 142 },
-    { date: '28 May', visits: 120 },
-    { date: '29 May', visits: 148 },
-    { date: '30 May', visits: 162 },
-    { date: '31 May', visits: 154 },
-  ],
-  planDistribution: [
-    { name: 'Basic', value: 4 },
-    { name: 'Standard', value: 8 },
-    { name: 'Premium', value: 7 },
-    { name: 'Enterprise', value: 5 },
-  ],
-  statusDistribution: [
-    { name: 'Active', value: 19 },
-    { name: 'Suspended', value: 3 },
-    { name: 'Pending', value: 2 },
-  ],
-  revenueTrend: [
-    { month: 'Dec', revenue: 7500 },
-    { month: 'Jan', revenue: 9000 },
-    { month: 'Feb', revenue: 10500 },
-    { month: 'Mar', revenue: 11800 },
-    { month: 'Apr', revenue: 12500 },
-    { month: 'May', revenue: 13200 },
-  ],
+  stats: { totalCompanies: 24, activeCompanies: 19, totalVisitors: 8432, visitsToday: 154, activeUsers: 843, monthlyGrowthPercent: 12.8 },
+  companyGrowth: [{ month: 'Dec 2025', companies: 15 }, { month: 'Jan 2026', companies: 18 }, { month: 'Feb 2026', companies: 20 }, { month: 'Mar 2026', companies: 22 }, { month: 'Apr 2026', companies: 23 }, { month: 'May 2026', companies: 24 }],
+  visitorTrend: [{ date: '25 May', visits: 110 }, { date: '26 May', visits: 135 }, { date: '27 May', visits: 142 }, { date: '28 May', visits: 120 }, { date: '29 May', visits: 148 }, { date: '30 May', visits: 162 }, { date: '31 May', visits: 154 }],
+  planDistribution: [{ name: 'Basic', value: 4 }, { name: 'Standard', value: 8 }, { name: 'Premium', value: 7 }, { name: 'Enterprise', value: 5 }],
+  statusDistribution: [{ name: 'Active', value: 19 }, { name: 'Suspended', value: 3 }, { name: 'Pending', value: 2 }],
+  revenueTrend: [{ month: 'Dec', revenue: 7500 }, { month: 'Jan', revenue: 9000 }, { month: 'Feb', revenue: 10500 }, { month: 'Mar', revenue: 11800 }, { month: 'Apr', revenue: 12500 }, { month: 'May', revenue: 13200 }],
 };
 
 /* ==========================================================
-   TENANTS MANAGEMENT HOOKS
+   HELPER — Backend tenant → Frontend TenantCompany
+   ========================================================== */
+
+const mapTenant = (t: any): TenantCompany => ({
+  _id: t._id,
+  name: t.name,
+  code: t.code,
+  contactPerson: t.contactPerson || '',
+  email: t.email,
+  phone: t.phone || '',
+  address: t.address || '',
+  gstNumber: t.gstNumber || '',
+  subscriptionPlan: t.plan
+    ? (t.plan.charAt(0).toUpperCase() + t.plan.slice(1)) as TenantCompany['subscriptionPlan']
+    : 'Basic',
+  maxUsers: t.maxUsers || 50,
+  activeUsers: t.activeUsers || 0,
+  status: t.status || (t.is_active ? 'Active' : 'Suspended'),
+  createdAt: t.createdAt,
+  updatedAt: t.updatedAt,
+});
+
+/* ==========================================================
+   TENANTS HOOKS
    ========================================================== */
 
 export const useTenants = (search = '', status = 'All') => {
@@ -260,15 +153,24 @@ export const useTenants = (search = '', status = 'All') => {
     queryKey: ['tenants', search, status],
     queryFn: async () => {
       try {
-        const response = await httpClient.get<ApiResponse<TenantCompany[]>>('/super-admin/tenants', {
+        const response = await httpClient.get('/tenants', {
           params: { search, status },
         });
-        return response.data.data;
+        const tenants: any[] = response.data.data || [];
+        return tenants
+          .map(mapTenant)
+          .filter((c) => {
+            const matchesSearch = !search ||
+              c.name.toLowerCase().includes(search.toLowerCase()) ||
+              c.code.toLowerCase().includes(search.toLowerCase()) ||
+              c.email.toLowerCase().includes(search.toLowerCase());
+            const matchesStatus = status === 'All' || c.status === status;
+            return matchesSearch && matchesStatus;
+          });
       } catch (err) {
-        console.warn('Tenants endpoint failed, falling back to mock database.');
-        // Filter mock
+        console.warn('Tenants API failed, using mock data.');
         return mockTenants.filter((c) => {
-          const matchesSearch =
+          const matchesSearch = !search ||
             c.name.toLowerCase().includes(search.toLowerCase()) ||
             c.code.toLowerCase().includes(search.toLowerCase()) ||
             c.email.toLowerCase().includes(search.toLowerCase());
@@ -285,13 +187,25 @@ export const useCreateTenant = () => {
   return useMutation<TenantCompany, Error, Omit<TenantCompany, '_id' | 'createdAt' | 'updatedAt' | 'activeUsers'>>({
     mutationFn: async (payload) => {
       try {
-        const response = await httpClient.post<ApiResponse<TenantCompany>>('/super-admin/tenants', payload);
-        return response.data.data;
+        const backendPayload = {
+          name: payload.name,
+          code: payload.code,
+          email: payload.email,
+          phone: payload.phone,
+          contactPerson: payload.contactPerson,
+          gstNumber: payload.gstNumber,
+          address: payload.address,
+          plan: payload.subscriptionPlan?.toLowerCase(),
+          maxUsers: payload.maxUsers,
+          status: payload.status,
+        };
+        const response = await httpClient.post('/tenants', backendPayload);
+        return mapTenant(response.data.data);
       } catch (err) {
-        console.warn('Creating tenant via mock database.');
+        console.warn('Creating tenant via mock.');
         const newTenant: TenantCompany = {
           ...payload,
-          _id: `t${mockTenants.length + 1}`,
+          _id: `t${Date.now()}`,
           activeUsers: 0,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -312,11 +226,18 @@ export const useUpdateTenant = () => {
   return useMutation<TenantCompany, Error, { id: string; payload: Partial<TenantCompany> }>({
     mutationFn: async ({ id, payload }) => {
       try {
-        const response = await httpClient.put<ApiResponse<TenantCompany>>(`/super-admin/tenants/${id}`, payload);
-        return response.data.data;
+        const backendPayload: any = { ...payload };
+        if (payload.subscriptionPlan) {
+          backendPayload.plan = payload.subscriptionPlan.toLowerCase();
+          delete backendPayload.subscriptionPlan;
+        }
+        const response = await httpClient.put(`/tenants/${id}`, backendPayload);
+        return mapTenant(response.data.data);
       } catch (err) {
-        console.warn('Updating tenant via mock database.');
-        mockTenants = mockTenants.map((t) => (t._id === id ? { ...t, ...payload, updatedAt: new Date().toISOString() } : t));
+        console.warn('Updating tenant via mock.');
+        mockTenants = mockTenants.map((t) =>
+          t._id === id ? { ...t, ...payload, updatedAt: new Date().toISOString() } : t
+        );
         return mockTenants.find((t) => t._id === id)!;
       }
     },
@@ -331,10 +252,10 @@ export const useDeleteTenant = () => {
   return useMutation<{ success: boolean; message?: string }, Error, string>({
     mutationFn: async (id) => {
       try {
-        const response = await httpClient.delete<ApiResponse<{ success: boolean; message?: string }>>(`/super-admin/tenants/${id}`);
-        return response.data.data;
+        await httpClient.delete(`/tenants/${id}`);
+        return { success: true };
       } catch (err) {
-        console.warn('Deleting tenant via mock database.');
+        console.warn('Deleting tenant via mock.');
         mockTenants = mockTenants.filter((t) => t._id !== id);
         return { success: true };
       }
@@ -355,12 +276,10 @@ export const useMasterTypes = (search = '') => {
     queryKey: ['master-types', search],
     queryFn: async () => {
       try {
-        const response = await httpClient.get<ApiResponse<MasterType[]>>('/super-admin/master-types', {
-          params: { search },
-        });
-        return response.data.data;
+        const response = await httpClient.get('/master-types', { params: { search } });
+        return response.data.data || [];
       } catch (err) {
-        console.warn('Master types endpoint failed, falling back to mock database.');
+        console.warn('Master types API failed, using mock.');
         return mockMasterTypes.filter(
           (mt) =>
             mt.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -376,12 +295,12 @@ export const useCreateMasterType = () => {
   return useMutation<MasterType, Error, Omit<MasterType, '_id' | 'createdAt' | 'updatedAt'>>({
     mutationFn: async (payload) => {
       try {
-        const response = await httpClient.post<ApiResponse<MasterType>>('/super-admin/master-types', payload);
+        const response = await httpClient.post('/master-types', payload);
         return response.data.data;
       } catch (err) {
         const newType: MasterType = {
           ...payload,
-          _id: `mt${mockMasterTypes.length + 1}`,
+          _id: `mt${Date.now()}`,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -389,9 +308,7 @@ export const useCreateMasterType = () => {
         return newType;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-types'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-types'] }),
   });
 };
 
@@ -400,7 +317,7 @@ export const useUpdateMasterType = () => {
   return useMutation<MasterType, Error, { id: string; payload: Partial<MasterType> }>({
     mutationFn: async ({ id, payload }) => {
       try {
-        const response = await httpClient.put<ApiResponse<MasterType>>(`/super-admin/master-types/${id}`, payload);
+        const response = await httpClient.put(`/master-types/${id}`, payload);
         return response.data.data;
       } catch (err) {
         mockMasterTypes = mockMasterTypes.map((mt) =>
@@ -409,9 +326,7 @@ export const useUpdateMasterType = () => {
         return mockMasterTypes.find((mt) => mt._id === id)!;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-types'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-types'] }),
   });
 };
 
@@ -420,16 +335,14 @@ export const useDeleteMasterType = () => {
   return useMutation<{ success: boolean }, Error, string>({
     mutationFn: async (id) => {
       try {
-        await httpClient.delete(`/super-admin/master-types/${id}`);
+        await httpClient.delete(`/master-types/${id}`);
         return { success: true };
       } catch (err) {
         mockMasterTypes = mockMasterTypes.filter((mt) => mt._id !== id);
         return { success: true };
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-types'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-types'] }),
   });
 };
 
@@ -442,12 +355,10 @@ export const useMasterData = (typeCode = 'All', search = '') => {
     queryKey: ['master-data', typeCode, search],
     queryFn: async () => {
       try {
-        const response = await httpClient.get<ApiResponse<MasterDataItem[]>>('/super-admin/master-data', {
-          params: { typeCode, search },
-        });
-        return response.data.data;
+        const response = await httpClient.get('/master-data', { params: { typeCode, search } });
+        return response.data.data || [];
       } catch (err) {
-        console.warn('Master data endpoint failed, falling back to mock database.');
+        console.warn('Master data API failed, using mock.');
         return mockMasterData.filter((md) => {
           const matchesType = typeCode === 'All' || md.typeCode === typeCode;
           const matchesSearch =
@@ -465,12 +376,12 @@ export const useCreateMasterData = () => {
   return useMutation<MasterDataItem, Error, Omit<MasterDataItem, '_id' | 'createdAt' | 'updatedAt'>>({
     mutationFn: async (payload) => {
       try {
-        const response = await httpClient.post<ApiResponse<MasterDataItem>>('/super-admin/master-data', payload);
+        const response = await httpClient.post('/master-data', payload);
         return response.data.data;
       } catch (err) {
         const newItem: MasterDataItem = {
           ...payload,
-          _id: `md${mockMasterData.length + 1}`,
+          _id: `md${Date.now()}`,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -478,9 +389,7 @@ export const useCreateMasterData = () => {
         return newItem;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-data'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-data'] }),
   });
 };
 
@@ -489,7 +398,7 @@ export const useUpdateMasterData = () => {
   return useMutation<MasterDataItem, Error, { id: string; payload: Partial<MasterDataItem> }>({
     mutationFn: async ({ id, payload }) => {
       try {
-        const response = await httpClient.put<ApiResponse<MasterDataItem>>(`/super-admin/master-data/${id}`, payload);
+        const response = await httpClient.put(`/master-data/${id}`, payload);
         return response.data.data;
       } catch (err) {
         mockMasterData = mockMasterData.map((md) =>
@@ -498,9 +407,7 @@ export const useUpdateMasterData = () => {
         return mockMasterData.find((md) => md._id === id)!;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-data'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-data'] }),
   });
 };
 
@@ -509,21 +416,19 @@ export const useDeleteMasterData = () => {
   return useMutation<{ success: boolean }, Error, string>({
     mutationFn: async (id) => {
       try {
-        await httpClient.delete(`/super-admin/master-data/${id}`);
+        await httpClient.delete(`/master-data/${id}`);
         return { success: true };
       } catch (err) {
         mockMasterData = mockMasterData.filter((md) => md._id !== id);
         return { success: true };
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-data'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-data'] }),
   });
 };
 
 /* ==========================================================
-   GLOBAL ANALYTICS & UNIVERSAL SEARCH HOOKS
+   GLOBAL ANALYTICS HOOK
    ========================================================== */
 
 export const useGlobalAnalytics = (dateRange = '30d') => {
@@ -531,17 +436,19 @@ export const useGlobalAnalytics = (dateRange = '30d') => {
     queryKey: ['global-analytics', dateRange],
     queryFn: async () => {
       try {
-        const response = await httpClient.get<ApiResponse<GlobalAnalytics>>('/super-admin/analytics', {
-          params: { dateRange },
-        });
+        const response = await httpClient.get('/audit-logs/analytics', { params: { dateRange } });
         return response.data.data;
       } catch (err) {
-        console.warn('Analytics endpoint failed, using static metrics.');
+        console.warn('Analytics API failed, using mock.');
         return mockAnalytics;
       }
     },
   });
 };
+
+/* ==========================================================
+   UNIVERSAL SEARCH HOOK
+   ========================================================== */
 
 export const useUniversalSearch = (query = '') => {
   return useQuery<SearchItem[]>({
@@ -549,53 +456,27 @@ export const useUniversalSearch = (query = '') => {
     queryFn: async () => {
       if (!query.trim()) return [];
       try {
-        const response = await httpClient.get<ApiResponse<SearchItem[]>>('/super-admin/search', {
-          params: { query },
-        });
-        return response.data.data;
+        const response = await httpClient.get('/search', { params: { query } });
+        return response.data.data || [];
       } catch (err) {
         const lowercaseQuery = query.toLowerCase();
         const results: SearchItem[] = [];
 
-        // Search Tenants
         mockTenants.forEach((t) => {
           if (t.name.toLowerCase().includes(lowercaseQuery) || t.code.toLowerCase().includes(lowercaseQuery)) {
-            results.push({
-              id: t._id,
-              title: t.name,
-              subtitle: `Tenant Code: ${t.code} | Plan: ${t.subscriptionPlan}`,
-              type: 'Tenant',
-              link: '/super-admin/tenants',
-              status: t.status,
-            });
+            results.push({ id: t._id, title: t.name, subtitle: `Tenant Code: ${t.code} | Plan: ${t.subscriptionPlan}`, type: 'Tenant', link: '/super-admin/tenants', status: t.status });
           }
         });
 
-        // Search Master Types
         mockMasterTypes.forEach((mt) => {
           if (mt.name.toLowerCase().includes(lowercaseQuery) || mt.code.toLowerCase().includes(lowercaseQuery)) {
-            results.push({
-              id: mt._id,
-              title: mt.name,
-              subtitle: `Master Category | Code: ${mt.code}`,
-              type: 'MasterType',
-              link: '/super-admin/master-types',
-              status: mt.status,
-            });
+            results.push({ id: mt._id, title: mt.name, subtitle: `Master Category | Code: ${mt.code}`, type: 'MasterType', link: '/super-admin/master-types', status: mt.status });
           }
         });
 
-        // Search Master Data
         mockMasterData.forEach((md) => {
           if (md.name.toLowerCase().includes(lowercaseQuery) || md.code.toLowerCase().includes(lowercaseQuery)) {
-            results.push({
-              id: md._id,
-              title: md.name,
-              subtitle: `Master Record | Code: ${md.code} under Type: ${md.typeCode}`,
-              type: 'MasterData',
-              link: '/super-admin/master-data',
-              status: md.status,
-            });
+            results.push({ id: md._id, title: md.name, subtitle: `Master Record | Code: ${md.code} under Type: ${md.typeCode}`, type: 'MasterData', link: '/super-admin/master-data', status: md.status });
           }
         });
 
