@@ -92,12 +92,6 @@ export const navigationConfig: NavigationItem[] = [
     allowedRoles: ['super_admin', 'auditor'],
   },
   {
-    name: 'Master Categories',
-    href: '/super-admin/master-types',
-    icon: Settings2,
-    allowedRoles: ['super_admin', 'support_admin'],
-  },
-  {
     name: 'Master Data',
     href: '/super-admin/master-data',
     icon: Database,

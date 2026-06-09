@@ -33,7 +33,38 @@ interface StatsCardProps {
   change?: number; // percentage change
   changeType?: 'positive' | 'negative' | 'neutral';
   isLoading?: boolean;
+  sparklineData?: number[];
 }
+
+const Sparkline: React.FC<{ data: number[]; color: string; id: string }> = ({ data, color, id }) => {
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min === 0 ? 1 : max - min;
+  const width = 80;
+  const height = 28;
+  const points = data.map((val, idx) => {
+    const x = (idx / (data.length - 1)) * width;
+    const y = height - 2 - ((val - min) / range) * (height - 4);
+    return `${x},${y}`;
+  });
+
+  const pathD = `M ${points.join(' L ')}`;
+  const areaD = `${pathD} L ${width},${height} L 0,${height} Z`;
+
+  return (
+    <svg width={width} height={height} className="overflow-visible select-none pointer-events-none">
+      <defs>
+        <linearGradient id={`grad-${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.15} />
+          <stop offset="100%" stopColor={color} stopOpacity={0.0} />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#grad-${id})`} />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+};
 
 export const StatsCard: React.FC<StatsCardProps> = ({
   title,
@@ -43,6 +74,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   change,
   changeType = 'neutral',
   isLoading = false,
+  sparklineData,
 }) => {
   if (isLoading) {
     return (
@@ -59,29 +91,42 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
   const changeColor =
     changeType === 'positive'
-      ? 'text-green-600 bg-green-50'
+      ? 'text-emerald-700 bg-emerald-50 border border-emerald-100/80'
       : changeType === 'negative'
-      ? 'text-red-600 bg-red-50'
-      : 'text-slate-500 bg-slate-50';
+      ? 'text-rose-700 bg-rose-50 border border-rose-100/80'
+      : 'text-slate-600 bg-slate-50 border border-slate-100';
+
+  const sparklineColor = changeType === 'negative' ? '#f43f5e' : '#10b981';
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between relative overflow-hidden group">
+    <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{title}</span>
-        <div className="p-2 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors duration-200">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{title}</span>
+        <div className="p-2.5 rounded-xl bg-slate-50 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:scale-105 transition-all duration-300">
           {icon}
         </div>
       </div>
-      <div className="mt-4 space-y-1">
-        <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
-        <div className="flex items-center gap-2">
-          {change !== undefined && (
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${changeColor}`}>
-              {change > 0 ? `+${change}%` : `${change}%`}
-            </span>
-          )}
-          {description && <span className="text-xs text-slate-500">{description}</span>}
+      <div className="mt-5 flex items-end justify-between">
+        <div className="space-y-2">
+          <h3 className="text-3xl font-bold text-slate-800 tracking-tight leading-none">{value}</h3>
+          <div className="flex items-center gap-2">
+            {change !== undefined && (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${changeColor}`}>
+                {change > 0 ? `+${change}%` : `${change}%`}
+              </span>
+            )}
+            {description && <span className="text-xs text-slate-400 font-medium">{description}</span>}
+          </div>
         </div>
+        {sparklineData && (
+          <div className="mb-1 shrink-0">
+            <Sparkline
+              data={sparklineData}
+              color={sparklineColor}
+              id={title.replace(/\s+/g, '-').toLowerCase()}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

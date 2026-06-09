@@ -121,3 +121,13 @@ visitor-management-system/
 ## Status
 
 Currently under development.
+
+## Recent UI & Architecture Improvements (June 2026)
+
+- **Consolidated Master Data**: Merged "Master Categories" and "Master Records" under a single, unified "Master Data" sidebar item. Management of both schemas is now handled via a high-performance tabbed interface inside the Super Admin dashboard.
+- **Premium Design Upgrade**:
+  - Re-themed the system typography with the **Plus Jakarta Sans** Google Font, providing a modern, sleek sans-serif style.
+  - Implemented interactive glassmorphism-style card structures with hover lift micro-animations.
+  - Embedded real-time SVG sparkline visualizers inside metric blocks to represent multi-day data trends directly.
+  - Refactored dashboard charts (Recharts) with sleek visual gradients, custom Tooltip components, and clean grid alignment.
+  - Added a premium segmented date-range pill selector (7 Days / 30 Days / 90 Days) for filtering dashboard metrics.
