@@ -89,6 +89,7 @@ const { createAuditLog } = require('../middleware/auditLog');
 router.post('/super-admin/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        const normalizedEmail = email ? email.trim().toLowerCase() : '';
 
         const existing = await User.findOne({ role: 'super_admin' });
         if (existing) {
@@ -102,7 +103,7 @@ router.post('/super-admin/register', async (req, res) => {
 
         const superAdmin = new User({
             name,
-            email,
+            email: normalizedEmail,
             password: hashedPassword,
             role: 'super_admin',
             tenant_id: null,
@@ -128,8 +129,9 @@ router.post('/super-admin/register', async (req, res) => {
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password, role, department, tenant_id, realm_id } = req.body;
+        const normalizedEmail = email ? email.trim().toLowerCase() : '';
 
-        const existingUser = await User.findOne({ email, tenant_id });
+        const existingUser = await User.findOne({ email: normalizedEmail, tenant_id });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -141,7 +143,7 @@ router.post('/register', async (req, res) => {
 
         const user = new User({
             name,
-            email,
+            email: normalizedEmail,
             password: hashedPassword,
             role,
             department,
@@ -168,17 +170,18 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        const normalizedEmail = email ? email.trim().toLowerCase() : '';
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: normalizedEmail });
         if (!user) {
             // Failed login bhi log karo!
             await createAuditLog({
                 action: 'LOGIN',
                 module: 'auth',
-                description: `Failed login attempt: ${email}`,
+                description: `Failed login attempt: ${normalizedEmail}`,
                 ip_address: req.ip,
                 status: 'failed',
-                metadata: { email }
+                metadata: { email: normalizedEmail }
             });
             return res.status(400).json({
                 success: false,

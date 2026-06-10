@@ -48,11 +48,11 @@ export interface MasterType {
  */
 export interface TranslationSchema {
   en: string; // English
-  hi?: string; // Hindi
-  ta?: string; // Tamil
-  te?: string; // Telugu
-  mr?: string; // Marathi
-  bn?: string; // Bengali
+  hi: string; // Hindi
+  ta: string; // Tamil
+  te: string; // Telugu
+  mr: string; // Marathi
+  bn: string; // Bengali
 }
 
 export type SupportedLanguage = keyof TranslationSchema;
