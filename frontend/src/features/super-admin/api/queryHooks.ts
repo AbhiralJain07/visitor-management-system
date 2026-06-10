@@ -275,22 +275,13 @@ export const useMasterTypes = (search = '') => {
   return useQuery<MasterType[]>({
     queryKey: ['master-types', search],
     queryFn: async () => {
-      try {
-        const response = await httpClient.get('/master-types', { params: { search } });
-        const data = response.data.data || [];
-        return data.map((item: any) => ({
-          ...item,
-          status: item.status || (item.is_active ? 'Active' : 'Inactive'),
-          description: item.description || '',
-        }));
-      } catch (err) {
-        console.warn('Master types API failed, using mock.');
-        return mockMasterTypes.filter(
-          (mt) =>
-            mt.name.toLowerCase().includes(search.toLowerCase()) ||
-            mt.code.toLowerCase().includes(search.toLowerCase())
-        );
-      }
+      const response = await httpClient.get('/master-types', { params: { search } });
+      const data = response.data.data || [];
+      return data.map((item: any) => ({
+        ...item,
+        status: item.status || (item.is_active ? 'Active' : 'Inactive'),
+        description: item.description || '',
+      }));
     },
   });
 };
@@ -299,19 +290,15 @@ export const useCreateMasterType = () => {
   const queryClient = useQueryClient();
   return useMutation<MasterType, Error, Omit<MasterType, '_id' | 'createdAt' | 'updatedAt'>>({
     mutationFn: async (payload) => {
-      try {
-        const response = await httpClient.post('/master-types', payload);
-        return response.data.data;
-      } catch (err) {
-        const newType: MasterType = {
-          ...payload,
-          _id: `mt${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        mockMasterTypes.unshift(newType);
-        return newType;
-      }
+      const backendPayload = {
+        code: payload.code,
+        name: payload.name,
+        description: payload.description,
+        is_active: (payload as any).status === 'Active',
+        is_global: true, // Super admin categories are global by default
+      };
+      const response = await httpClient.post('/master-types', backendPayload);
+      return response.data.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-types'] }),
   });
@@ -321,15 +308,15 @@ export const useUpdateMasterType = () => {
   const queryClient = useQueryClient();
   return useMutation<MasterType, Error, { id: string; payload: Partial<MasterType> }>({
     mutationFn: async ({ id, payload }) => {
-      try {
-        const response = await httpClient.put(`/master-types/${id}`, payload);
-        return response.data.data;
-      } catch (err) {
-        mockMasterTypes = mockMasterTypes.map((mt) =>
-          mt._id === id ? { ...mt, ...payload, updatedAt: new Date().toISOString() } : mt
-        );
-        return mockMasterTypes.find((mt) => mt._id === id)!;
+      const backendPayload: any = {};
+      if (payload.code) backendPayload.code = payload.code;
+      if (payload.name) backendPayload.name = payload.name;
+      if (payload.description) backendPayload.description = payload.description;
+      if ((payload as any).status) {
+        backendPayload.is_active = (payload as any).status === 'Active';
       }
+      const response = await httpClient.put(`/master-types/${id}`, backendPayload);
+      return response.data.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-types'] }),
   });
@@ -339,13 +326,8 @@ export const useDeleteMasterType = () => {
   const queryClient = useQueryClient();
   return useMutation<{ success: boolean }, Error, string>({
     mutationFn: async (id) => {
-      try {
-        await httpClient.delete(`/master-types/${id}`);
-        return { success: true };
-      } catch (err) {
-        mockMasterTypes = mockMasterTypes.filter((mt) => mt._id !== id);
-        return { success: true };
-      }
+      await httpClient.delete(`/master-types/${id}`);
+      return { success: true };
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-types'] }),
   });
@@ -359,27 +341,20 @@ export const useMasterData = (typeCode = 'All', search = '') => {
   return useQuery<MasterDataItem[]>({
     queryKey: ['master-data', typeCode, search],
     queryFn: async () => {
-      try {
-        const response = await httpClient.get('/master-data', { params: { typeCode, search } });
-        const data = response.data.data || [];
-        return data.map((item: any) => ({
-          ...item,
-          status: item.status || (item.is_active ? 'Active' : 'Inactive'),
-          sortOrder: item.sort_order ?? item.sortOrder ?? 0,
-          typeCode: item.master_type_id?.code || typeCode || 'GENERAL',
-          translations: item.translations || { en: item.name, hi: '', ta: '', te: '', mr: '', bn: '' },
-        }));
-
-      } catch (err) {
-        console.warn('Master data API failed, using mock.');
-        return mockMasterData.filter((md) => {
-          const matchesType = typeCode === 'All' || md.typeCode === typeCode;
-          const matchesSearch =
-            md.name.toLowerCase().includes(search.toLowerCase()) ||
-            md.code.toLowerCase().includes(search.toLowerCase());
-          return matchesType && matchesSearch;
-        });
-      }
+      const response = await httpClient.get('/master-data', {
+        params: {
+          type: typeCode === 'All' ? undefined : typeCode,
+          search,
+        },
+      });
+      const data = response.data.data || [];
+      return data.map((item: any) => ({
+        ...item,
+        status: item.status || (item.is_active ? 'Active' : 'Inactive'),
+        sortOrder: item.sort_order ?? item.sortOrder ?? 0,
+        typeCode: item.master_type_id?.code || typeCode || 'GENERAL',
+        translations: item.translations || { en: item.name, hi: '', ta: '', te: '', mr: '', bn: '' },
+      }));
     },
   });
 };
@@ -388,19 +363,22 @@ export const useCreateMasterData = () => {
   const queryClient = useQueryClient();
   return useMutation<MasterDataItem, Error, Omit<MasterDataItem, '_id' | 'createdAt' | 'updatedAt'>>({
     mutationFn: async (payload) => {
-      try {
-        const response = await httpClient.post('/master-data', payload);
-        return response.data.data;
-      } catch (err) {
-        const newItem: MasterDataItem = {
-          ...payload,
-          _id: `md${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        mockMasterData.unshift(newItem);
-        return newItem;
-      }
+      const backendPayload = {
+        master_type_id: payload.master_type_id,
+        code: payload.code,
+        name: payload.name,
+        sort_order: payload.sortOrder ?? 0,
+        is_active: payload.status === 'Active',
+        is_global: true, // Super admin records are global
+        translations: {
+          hi: payload.translations?.hi || '',
+          ta: payload.translations?.ta || '',
+          te: payload.translations?.te || '',
+          mr: payload.translations?.mr || '',
+        },
+      };
+      const response = await httpClient.post('/master-data', backendPayload);
+      return response.data.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-data'] }),
   });
@@ -410,15 +388,22 @@ export const useUpdateMasterData = () => {
   const queryClient = useQueryClient();
   return useMutation<MasterDataItem, Error, { id: string; payload: Partial<MasterDataItem> }>({
     mutationFn: async ({ id, payload }) => {
-      try {
-        const response = await httpClient.put(`/master-data/${id}`, payload);
-        return response.data.data;
-      } catch (err) {
-        mockMasterData = mockMasterData.map((md) =>
-          md._id === id ? { ...md, ...payload, updatedAt: new Date().toISOString() } : md
-        );
-        return mockMasterData.find((md) => md._id === id)!;
+      const backendPayload: any = {};
+      if (payload.master_type_id) backendPayload.master_type_id = payload.master_type_id;
+      if (payload.code) backendPayload.code = payload.code;
+      if (payload.name) backendPayload.name = payload.name;
+      if (payload.sortOrder !== undefined) backendPayload.sort_order = payload.sortOrder;
+      if (payload.status) backendPayload.is_active = payload.status === 'Active';
+      if (payload.translations) {
+        backendPayload.translations = {
+          hi: payload.translations.hi || '',
+          ta: payload.translations.ta || '',
+          te: payload.translations.te || '',
+          mr: payload.translations.mr || '',
+        };
       }
+      const response = await httpClient.put(`/master-data/${id}`, backendPayload);
+      return response.data.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-data'] }),
   });
@@ -428,13 +413,8 @@ export const useDeleteMasterData = () => {
   const queryClient = useQueryClient();
   return useMutation<{ success: boolean }, Error, string>({
     mutationFn: async (id) => {
-      try {
-        await httpClient.delete(`/master-data/${id}`);
-        return { success: true };
-      } catch (err) {
-        mockMasterData = mockMasterData.filter((md) => md._id !== id);
-        return { success: true };
-      }
+      await httpClient.delete(`/master-data/${id}`);
+      return { success: true };
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['master-data'] }),
   });

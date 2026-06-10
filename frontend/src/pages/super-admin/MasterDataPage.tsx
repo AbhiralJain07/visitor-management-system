@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Edit2, ShieldX, Check, Trash2, X, AlertTriangle, Layers, Settings2, Database } from 'lucide-react';
+import { Plus, Edit2, ShieldX, Check, Trash2, X, AlertTriangle, Layers, Settings2, Database, ArrowLeft } from 'lucide-react';
 import {
   useMasterData,
   useMasterTypes,
@@ -32,7 +32,7 @@ import {
 
 export const MasterDataPage: React.FC = () => {
   // Tab State
-  const [activeTab, setActiveTab] = useState<'records' | 'categories'>('records');
+  const [activeTab, setActiveTab] = useState<'records' | 'categories' | null>(null);
 
   // Common Search & Page state
   const [search, setSearch] = useState('');
@@ -433,349 +433,248 @@ export const MasterDataPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title={activeTab === 'records' ? 'Master Records' : 'Master Categories'}
-        description={
-          activeTab === 'records'
-            ? 'Translate and customize operational labels used by employees and kiosks: Visitor Types, Visit Purposes, and ID Proof designations.'
-            : 'Configure client-wide categorization types like designation tags, visiting reasons, and accepted verification IDs.'
-        }
-        action={
-          activeTab === 'records' ? (
-            <PermissionGuard action="master_data:write">
-              <button
-                onClick={handleOpenAddRecordModal}
-                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98]"
-              >
-                <Plus size={15} />
-                <span>Add Record</span>
-              </button>
-            </PermissionGuard>
-          ) : (
-            <PermissionGuard action="master_types:write">
-              <button
-                onClick={handleOpenAddCategoryModal}
-                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98]"
-              >
-                <Plus size={15} />
-                <span>Add Category</span>
-              </button>
-            </PermissionGuard>
-          )
-        }
-      />
+      {activeTab === null ? (
+        /* Landing View: Select Cards */
+        <div className="space-y-6 animate-fadeIn">
+          {/* Header */}
+          <PageHeader
+            title="Master Data"
+            description="Configure global master records and metadata categories used across tenant kiosks and portals."
+          />
 
-      {/* Tabs Selector Switcher */}
-      <div className="flex border-b border-slate-200 gap-6">
-        <button
-          onClick={() => {
-            setActiveTab('records');
-            setSearch('');
-          }}
-          className={`pb-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 flex items-center gap-2 ${
-            activeTab === 'records'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-400 hover:text-slate-700'
-          }`}
-        >
-          <Database size={14} />
-          <span>Master Records</span>
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('categories');
-            setSearch('');
-          }}
-          className={`pb-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all shrink-0 flex items-center gap-2 ${
-            activeTab === 'categories'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-400 hover:text-slate-700'
-          }`}
-        >
-          <Settings2 size={14} />
-          <span>Master Categories</span>
-        </button>
-      </div>
-
-      {/* Main Tab Views */}
-      {activeTab === 'records' ? (
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Left pane: Category Navigation List */}
-          <div className="w-full lg:w-1/4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3 shrink-0">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block select-none">
-              Filter Master Categories
-            </span>
-            <div className="flex flex-row lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 custom-scrollbar">
-              <button
-                onClick={() => {
-                  setSelectedTypeCode('All');
-                  setCurrentPage(1);
-                }}
-                className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2 ${
-                  selectedTypeCode === 'All'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/60 lg:border-none'
-                }`}
-              >
-                <Layers size={14} />
-                <span>All Categories</span>
-              </button>
-
-              {masterTypes.map((type) => (
-                <button
-                  key={type._id}
-                  onClick={() => {
-                    setSelectedTypeCode(type.code);
-                    setCurrentPage(1);
-                  }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2 ${
-                    selectedTypeCode === type.code
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/60 lg:border-none'
-                  }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                  <span className="truncate">{type.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Right pane: Table items list */}
-          <div className="w-full lg:w-3/4 space-y-4">
-            <div className="flex items-center">
-              <SearchBar
-                value={search}
-                onChange={(val) => {
-                  setSearch(val);
-                  setCurrentPage(1);
-                }}
-                placeholder="Search records by name, code..."
-              />
-            </div>
-
-            {isItemsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, idx) => (
-                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm animate-pulse space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2 flex-1">
-                        <div className="h-3 bg-slate-100 rounded w-16"></div>
-                        <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                      </div>
-                      <div className="h-5 bg-slate-100 rounded-full w-14"></div>
-                    </div>
-                    <div className="h-px bg-slate-100"></div>
-                    <div className="flex justify-between items-center pt-1">
-                      <div className="h-4 bg-slate-100 rounded w-20"></div>
-                      <div className="h-6 bg-slate-100 rounded w-16"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : masterItems.length === 0 ? (
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
-                <div className="min-h-[300px] flex items-center justify-center p-8">
-                  <EmptyState
-                    title="No Records Found"
-                    description="No master data entries are currently configured under this category."
-                    action={
-                      <PermissionGuard action="master_data:write">
-                        <button
-                          onClick={handleOpenAddRecordModal}
-                          className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
-                        >
-                          Create First Record
-                        </button>
-                      </PermissionGuard>
-                    }
-                  />
+          {/* Selection Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+            {/* Master Records Card */}
+            <button
+              onClick={() => {
+                setActiveTab('records');
+                setSearch('');
+              }}
+              className="group text-left p-6 bg-white border border-slate-200/85 rounded-2xl hover:border-blue-500 hover:shadow-[0_12px_40px_rgba(59,130,246,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-64 focus:outline-none relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/30 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-blue-50/50 transition-colors" />
+              
+              <div className="space-y-4 relative z-10">
+                <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl w-fit group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 shadow-xs">
+                  <Database size={22} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-md font-bold text-slate-800 group-hover:text-blue-900 transition-colors">
+                    Master Records
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+                    Customize and translate specific variables and data points referenced by kiosk apps and employees, such as Visitor Types, Visit Purposes, and ID Proof documents.
+                  </p>
                 </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-fadeIn">
-                {masterItems.map((item) => (
-                  <div key={item._id} className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 group">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1">
-                        <span className="font-mono text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-100/50 px-2 py-0.5 rounded-md uppercase">
-                          {item.code}
-                        </span>
-                        <h4 className="font-bold text-slate-800 text-sm leading-tight pt-1">{item.name}</h4>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">
-                          {item.typeCode.replace('_', ' ')} Category
-                        </span>
-                      </div>
-                      <StatusBadge status={item.status} />
-                    </div>
 
-                    <div className="flex items-center justify-between border-t border-slate-100/60 pt-3 text-xs select-none">
-                      <div className="flex items-center gap-1.5 text-slate-400 font-bold">
-                        <span className="text-[9px] bg-slate-50 border border-slate-200/50 text-slate-500 px-2 py-0.5 rounded-md font-mono">
-                          #{item.sortOrder}
-                        </span>
-                        {(() => {
-                          const pct = getCompletenessPercent(item.translations);
-                          const badgeColor =
-                            pct === 100
-                              ? 'text-green-700 bg-green-50 border-green-100/80'
-                              : pct >= 50
-                              ? 'text-amber-700 bg-amber-50 border-amber-100/80'
-                              : 'text-red-700 bg-red-50 border-red-100/80';
-                          return (
-                            <span className={`text-[9px] font-bold px-2 py-0.5 border rounded-md ${badgeColor}`}>
-                              {getCompletenessText(item.translations)} translations
-                            </span>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-1.5 opacity-85 group-hover:opacity-100 transition-opacity">
-                        <PermissionGuard action="master_data:write">
-                          <button
-                            onClick={() => handleOpenEditRecordModal(item)}
-                            className="p-1 border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors shadow-2xs"
-                            title="Edit Record"
-                          >
-                            <Edit2 size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleToggleRecordStatus(item)}
-                            className={`p-1 border rounded-lg transition-colors shadow-2xs ${
-                              item.status === 'Active'
-                                ? 'border-red-100 bg-white text-red-600 hover:bg-red-50'
-                                : 'border-green-100 bg-white text-green-600 hover:bg-green-50'
-                            }`}
-                            title={item.status === 'Active' ? 'Deactivate Record' : 'Activate Record'}
-                          >
-                            {item.status === 'Active' ? <ShieldX size={13} /> : <Check size={13} />}
-                          </button>
-                        </PermissionGuard>
-
-                        <PermissionGuard action="master_data:delete">
-                          <button
-                            onClick={() => setRecordDeleteConfirmId(item._id)}
-                            className="p-1 border border-red-100 rounded-lg bg-white text-red-600 hover:bg-red-50 hover:border-red-100/60 transition-colors shadow-2xs"
-                            title="Delete Record"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </PermissionGuard>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 relative z-10 w-full">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Manage labels & translations
+                </span>
+                <span className="text-xs font-semibold text-blue-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                  Manage Records &rarr;
+                </span>
               </div>
-            )}
+            </button>
+
+            {/* Master Categories Card */}
+            <button
+              onClick={() => {
+                setActiveTab('categories');
+                setSearch('');
+              }}
+              className="group text-left p-6 bg-white border border-slate-200/85 rounded-2xl hover:border-blue-500 hover:shadow-[0_12px_40px_rgba(59,130,246,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-64 focus:outline-none relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-indigo-50/50 transition-colors" />
+
+              <div className="space-y-4 relative z-10">
+                <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-xl w-fit group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-xs">
+                  <Settings2 size={22} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-md font-bold text-slate-800 group-hover:text-indigo-900 transition-colors">
+                    Master Categories
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+                    Establish global metadata categories and schema keys. Define accepted forms of verification, designation groupings, and client-level classification folders.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 relative z-10 w-full">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Configure types & schemas
+                </span>
+                <span className="text-xs font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                  Configure Categories &rarr;
+                </span>
+              </div>
+            </button>
           </div>
         </div>
       ) : (
-        /* Categories Tab View */
-        <div className="space-y-4">
-          <div className="flex items-center">
-            <SearchBar
-              value={search}
-              onChange={(val) => {
-                setSearch(val);
-                setCurrentPage(1);
-              }}
-              placeholder="Search categories by name, code..."
-            />
-          </div>
+        /* Management Subviews: Records or Categories */
+        <div className="space-y-6 animate-fadeIn">
+          {/* Back Button */}
+          <button
+            onClick={() => setActiveTab(null)}
+            className="group flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors w-fit focus:outline-none"
+          >
+            <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
+            <span>Back to Master Data</span>
+          </button>
 
-          {isTypesLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm animate-pulse space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2 flex-1">
-                      <div className="h-3 bg-slate-100 rounded w-16"></div>
-                      <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                    </div>
-                    <div className="h-5 bg-slate-100 rounded-full w-14"></div>
-                  </div>
-                  <div className="h-10 bg-slate-50 rounded w-full"></div>
-                  <div className="h-px bg-slate-100"></div>
-                  <div className="flex justify-end gap-1.5 pt-1">
-                    <div className="h-7 w-7 bg-slate-100 rounded-lg"></div>
-                    <div className="h-7 w-7 bg-slate-100 rounded-lg"></div>
-                  </div>
+          {/* Header */}
+          <PageHeader
+            title={activeTab === 'records' ? 'Master Records' : 'Master Categories'}
+            description={
+              activeTab === 'records'
+                ? 'Translate and customize operational labels used by employees and kiosks: Visitor Types, Visit Purposes, and ID Proof designations.'
+                : 'Configure client-wide categorization types like designation tags, visiting reasons, and accepted verification IDs.'
+            }
+            action={
+              activeTab === 'records' ? (
+                <PermissionGuard action="master_data:write">
+                  <button
+                    onClick={handleOpenAddRecordModal}
+                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98]"
+                  >
+                    <Plus size={15} />
+                    <span>Add Record</span>
+                  </button>
+                </PermissionGuard>
+              ) : (
+                <PermissionGuard action="master_types:write">
+                  <button
+                    onClick={handleOpenAddCategoryModal}
+                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98]"
+                  >
+                    <Plus size={15} />
+                    <span>Add Category</span>
+                  </button>
+                </PermissionGuard>
+              )
+            }
+          />
+
+          {/* Subview Content */}
+          {activeTab === 'records' ? (
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+              {/* Left pane: Category Navigation List */}
+              <div className="w-full lg:w-1/4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3 shrink-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block select-none">
+                  Filter Master Categories
+                </span>
+                <div className="flex flex-row lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 custom-scrollbar">
+                  <button
+                    onClick={() => {
+                      setSelectedTypeCode('All');
+                      setCurrentPage(1);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2 ${
+                      selectedTypeCode === 'All'
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
+                        : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/60 lg:border-none'
+                    }`}
+                  >
+                    <Layers size={14} />
+                    <span>All Categories</span>
+                  </button>
+
+                  {masterTypes.map((type) => (
+                    <button
+                      key={type._id}
+                      onClick={() => {
+                        setSelectedTypeCode(type.code);
+                        setCurrentPage(1);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2 ${
+                        selectedTypeCode === type.code
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
+                          : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/60 lg:border-none'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                      <span className="truncate">{type.name}</span>
+                    </button>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : masterTypesForTab.length === 0 ? (
-            <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
-              <div className="min-h-[300px] flex items-center justify-center p-8">
-                <EmptyState
-                  title="No Categories Configured"
-                  description="Create a master category code block to begin referencing custom metadata profiles."
-                  action={
-                    <PermissionGuard action="master_types:write">
-                      <button
-                        onClick={handleOpenAddCategoryModal}
-                        className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
-                      >
-                        Create First Category
-                      </button>
-                    </PermissionGuard>
+              </div>
+
+              {/* Right pane: Table items list */}
+              <div className="w-full lg:w-3/4 space-y-4">
+                <div className="flex items-center">
+                  <SearchBar
+                    value={search}
+                    onChange={(val) => {
+                      setSearch(val);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Search records by name, code..."
+                  />
+                </div>
+
+                <DataTable
+                  columns={recordColumns}
+                  data={masterItems}
+                  isLoading={isItemsLoading}
+                  currentPage={currentPage}
+                  totalPages={1}
+                  emptyState={
+                    <EmptyState
+                      title="No Records Found"
+                      description="No master data entries are currently configured under this category."
+                      action={
+                        <PermissionGuard action="master_data:write">
+                          <button
+                            onClick={handleOpenAddRecordModal}
+                            className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
+                          >
+                            Create First Record
+                          </button>
+                        </PermissionGuard>
+                      }
+                    />
                   }
                 />
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fadeIn">
-              {masterTypesForTab.map((type) => (
-                <div key={type._id} className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4 group">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1">
-                      <span className="font-mono text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-md uppercase">
-                        {type.code}
-                      </span>
-                      <h4 className="font-bold text-slate-800 text-sm leading-tight pt-1">{type.name}</h4>
-                    </div>
-                    <StatusBadge status={type.status} />
-                  </div>
+            /* Categories View */
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <SearchBar
+                  value={search}
+                  onChange={(val) => {
+                    setSearch(val);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Search categories by name, code..."
+                />
+              </div>
 
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2" title={type.description}>
-                    {type.description || 'No description provided.'}
-                  </p>
-
-                  <div className="flex items-center justify-end border-t border-slate-100/60 pt-3 gap-1.5 opacity-85 group-hover:opacity-100 transition-opacity">
-                    <PermissionGuard action="master_types:write">
-                      <button
-                        onClick={() => handleOpenEditCategoryModal(type)}
-                        className="p-1 border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors shadow-2xs"
-                        title="Edit Category"
-                      >
-                        <Edit2 size={13} />
-                      </button>
-                      <button
-                        onClick={() => handleToggleCategoryStatus(type)}
-                        className={`p-1 rounded-lg border transition-colors shadow-2xs ${
-                          type.status === 'Active'
-                            ? 'border-red-100 bg-white text-red-600 hover:bg-red-50'
-                            : 'border-green-100 bg-white text-green-600 hover:bg-green-50'
-                        }`}
-                        title={type.status === 'Active' ? 'Deactivate Category' : 'Activate Category'}
-                      >
-                        {type.status === 'Active' ? <ShieldX size={13} /> : <Check size={13} />}
-                      </button>
-                    </PermissionGuard>
-
-                    <PermissionGuard action="master_types:delete">
-                      <button
-                        onClick={() => setCategoryDeleteConfirmId(type._id)}
-                        className="p-1 border border-red-100 rounded-lg bg-white text-red-600 hover:bg-red-50 hover:border-red-100/60 transition-colors shadow-2xs"
-                        title="Delete Category"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </PermissionGuard>
-                  </div>
-                </div>
-              ))}
+              <DataTable
+                columns={categoryColumns}
+                data={masterTypesForTab}
+                isLoading={isTypesLoading}
+                emptyState={
+                  <EmptyState
+                    title="No Categories Configured"
+                    description="Create a master category code block to begin referencing custom metadata profiles."
+                    action={
+                      <PermissionGuard action="master_types:write">
+                        <button
+                          onClick={handleOpenAddCategoryModal}
+                          className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100/50 transition-colors"
+                        >
+                          Create First Category
+                        </button>
+                      </PermissionGuard>
+                    }
+                  />
+                }
+              />
             </div>
           )}
         </div>
