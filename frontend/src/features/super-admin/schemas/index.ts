@@ -70,9 +70,7 @@ export type MasterTypeFormFields = z.infer<typeof masterTypeFormSchema>;
  * Zod validation schema for Master Data Item Form
  */
 export const masterDataFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: 'Name is required.' }),
+  name: z.string().optional(),
   code: z
     .string()
     .min(1, { message: 'Code is required.' })
