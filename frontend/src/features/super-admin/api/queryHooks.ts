@@ -104,12 +104,12 @@ let mockMasterTypes: MasterType[] = [
 ];
 
 let mockMasterData: MasterDataItem[] = [
-  { _id: 'md1', name: 'General Guest', code: 'GUEST', typeCode: 'VISITOR_TYPE', sortOrder: 1, status: 'Active', translations: { en: 'General Guest', hi: 'सामान्य अतिथि' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
-  { _id: 'md2', name: 'Vendor Partner', code: 'VENDOR', typeCode: 'VISITOR_TYPE', sortOrder: 2, status: 'Active', translations: { en: 'Vendor Partner', hi: 'विक्रेता भागीदार' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
-  { _id: 'md3', name: 'Interview Candidate', code: 'CANDIDATE', typeCode: 'VISITOR_TYPE', sortOrder: 3, status: 'Active', translations: { en: 'Interview Candidate', hi: 'साक्षात्कार उम्मीदवार' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
-  { _id: 'md4', name: 'Business Meeting', code: 'MEETING', typeCode: 'PURPOSE_OF_VISIT', sortOrder: 1, status: 'Active', translations: { en: 'Business Meeting', hi: 'व्यावसायिक बैठक' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
-  { _id: 'md5', name: 'Aadhaar Card', code: 'AADHAAR', typeCode: 'ID_PROOF_TYPE', sortOrder: 1, status: 'Active', translations: { en: 'Aadhaar Card', hi: 'आधार कार्ड' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
-  { _id: 'md6', name: 'PAN Card', code: 'PAN_CARD', typeCode: 'ID_PROOF_TYPE', sortOrder: 2, status: 'Active', translations: { en: 'PAN Card', hi: 'पैन कार्ड' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md1', name: 'General Guest', code: 'GUEST', typeCode: 'VISITOR_TYPE', sortOrder: 1, status: 'Active', translations: { en: 'General Guest', hi: 'सामान्य अतिथि', ta: '', te: '', mr: '', bn: '' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md2', name: 'Vendor Partner', code: 'VENDOR', typeCode: 'VISITOR_TYPE', sortOrder: 2, status: 'Active', translations: { en: 'Vendor Partner', hi: 'विक्रेता भागीदार', ta: '', te: '', mr: '', bn: '' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md3', name: 'Interview Candidate', code: 'CANDIDATE', typeCode: 'VISITOR_TYPE', sortOrder: 3, status: 'Active', translations: { en: 'Interview Candidate', hi: 'साक्षात्कार उम्मीदवार', ta: '', te: '', mr: '', bn: '' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md4', name: 'Business Meeting', code: 'MEETING', typeCode: 'PURPOSE_OF_VISIT', sortOrder: 1, status: 'Active', translations: { en: 'Business Meeting', hi: 'व्यावसायिक बैठक', ta: '', te: '', mr: '', bn: '' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md5', name: 'Aadhaar Card', code: 'AADHAAR', typeCode: 'ID_PROOF_TYPE', sortOrder: 1, status: 'Active', translations: { en: 'Aadhaar Card', hi: 'आधार कार्ड', ta: '', te: '', mr: '', bn: '' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+  { _id: 'md6', name: 'PAN Card', code: 'PAN_CARD', typeCode: 'ID_PROOF_TYPE', sortOrder: 2, status: 'Active', translations: { en: 'PAN Card', hi: 'पैन कार्ड', ta: '', te: '', mr: '', bn: '' }, createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
 ];
 
 const mockAnalytics: GlobalAnalytics = {
