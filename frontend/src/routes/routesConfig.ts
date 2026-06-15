@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type UserRole = 'admin' | 'receptionist' | 'employee' | 'security' | 'super_admin' | 'support_admin' | 'auditor' | 'manager' | 'tenant_admin';
+export type UserRole = 'tenant_admin' | 'receptionist' | 'employee' | 'security' | 'super_admin' | 'support_admin' | 'auditor' | 'manager';
 
 export interface RouteItem {
   path: string;
@@ -15,63 +15,63 @@ export const routesConfig: RouteItem[] = [
     path: 'dashboard',
     component: React.lazy(() => import('@/pages/DashboardPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager', 'receptionist', 'employee', 'security'],
+    allowedRoles: ['tenant_admin', 'manager', 'receptionist', 'employee', 'security'],
     layout: 'dashboard',
   },
   {
     path: 'check-in',
     component: React.lazy(() => import('@/pages/CheckInPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'receptionist'],
+    allowedRoles: ['tenant_admin', 'receptionist'],
     layout: 'dashboard',
   },
   {
     path: 'approvals',
     component: React.lazy(() => import('@/pages/ApprovalsPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager', 'receptionist', 'employee', 'security'],
+    allowedRoles: ['tenant_admin', 'manager', 'receptionist', 'employee', 'security'],
     layout: 'dashboard',
   },
   {
     path: 'visitors',
     component: React.lazy(() => import('@/pages/VisitorsPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager', 'receptionist', 'security'],
+    allowedRoles: ['tenant_admin', 'manager', 'receptionist', 'security'],
     layout: 'dashboard',
   },
   {
     path: 'employees',
     component: React.lazy(() => import('@/pages/EmployeesPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager'],
+    allowedRoles: ['tenant_admin', 'manager'],
     layout: 'dashboard',
   },
   {
     path: 'offices',
     component: React.lazy(() => import('@/pages/OfficesPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager'],
+    allowedRoles: ['tenant_admin', 'manager'],
     layout: 'dashboard',
   },
   {
     path: 'visits',
     component: React.lazy(() => import('@/pages/VisitsPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager', 'receptionist', 'security'],
+    allowedRoles: ['tenant_admin', 'manager', 'receptionist', 'security'],
     layout: 'dashboard',
   },
   {
     path: 'master-data',
     component: React.lazy(() => import('@/pages/MasterDataPage')),
     isProtected: true,
-    allowedRoles: ['admin'],
+    allowedRoles: ['tenant_admin'],
     layout: 'dashboard',
   },
   {
     path: 'reports',
     component: React.lazy(() => import('@/pages/ReportsPage')),
     isProtected: true,
-    allowedRoles: ['admin', 'manager', 'receptionist'],
+    allowedRoles: ['tenant_admin', 'manager', 'receptionist'],
     layout: 'dashboard',
   },
   {
