@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Visit = require('../models/Visit');
 const User = require('../models/User');
+const Employee = require('../models/Employee');
 const Visitor = require('../models/Visitor');
 const { auth, checkRole } = require('../middleware/auth');
 const { sendMessage } = require('../telegram');
@@ -101,7 +102,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', '
         if (req.user.role !== 'super_admin') {
             query.tenant_id = req.user.tenant_id;
         }
-        if (req.user.realm_id) {
+        if (req.user.realm_id && req.user.role !== 'tenant_admin') {
             query.realm_id = req.user.realm_id;
         }
         if (req.user.role === 'employee') {
@@ -182,7 +183,7 @@ router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'),
         await visit.save();
 
         // Telegram notification
-        const host = await User.findById(host_id);
+        const host = await Employee.findById(host_id);
         const visitor = await Visitor.findById(visitor_id);
 
         if (host && host.telegram_id) {

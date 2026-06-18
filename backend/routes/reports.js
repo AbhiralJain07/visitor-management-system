@@ -16,7 +16,20 @@ router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist'), asyn
         const end = endDate ? new Date(endDate) : new Date();
         end.setHours(23, 59, 59, 999);
 
-        const dateFilter = { check_in: { $gte: start, $lte: end } };
+        const baseVisitFilter = {};
+        const visitorFilter = {};
+
+        if (req.user.role !== 'super_admin') {
+            baseVisitFilter.tenant_id = req.user.tenant_id;
+            visitorFilter.tenant_id = req.user.tenant_id;
+        }
+
+        if (req.user.realm_id && req.user.role !== 'tenant_admin') {
+            baseVisitFilter.realm_id = req.user.realm_id;
+            visitorFilter.realm_id = req.user.realm_id;
+        }
+
+        const dateFilter = { ...baseVisitFilter, check_in: { $gte: start, $lte: end } };
 
         // Core stats
         const [
@@ -33,15 +46,15 @@ router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist'), asyn
             Visit.countDocuments({ ...dateFilter, status: 'rejected' }),
             Visit.countDocuments({ ...dateFilter, status: 'pending' }),
             Visit.countDocuments({ ...dateFilter, status: 'exited' }),
-            Visitor.countDocuments(),
-            Visitor.countDocuments({ is_blacklisted: true }),
+            Visitor.countDocuments(visitorFilter),
+            Visitor.countDocuments({ ...visitorFilter, is_blacklisted: true }),
         ]);
 
         // Today stats
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
-        const visitsToday = await Visit.countDocuments({ check_in: { $gte: todayStart, $lte: todayEnd } });
-        const activeVisitors = await Visit.countDocuments({ status: 'approved', check_out: null });
+        const visitsToday = await Visit.countDocuments({ ...baseVisitFilter, check_in: { $gte: todayStart, $lte: todayEnd } });
+        const activeVisitors = await Visit.countDocuments({ ...baseVisitFilter, status: 'approved', check_out: null });
 
         // Daily visit trend — last 14 days
         const dailyTrend = [];
@@ -50,7 +63,10 @@ router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist'), asyn
             day.setDate(day.getDate() - i);
             const dayStart = new Date(day); dayStart.setHours(0, 0, 0, 0);
             const dayEnd = new Date(day); dayEnd.setHours(23, 59, 59, 999);
-            const count = await Visit.countDocuments({ check_in: { $gte: dayStart, $lte: dayEnd } });
+            const count = await Visit.countDocuments({
+                ...baseVisitFilter,
+                check_in: { $gte: dayStart, $lte: dayEnd }
+            });
             dailyTrend.push({
                 date: dayStart.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
                 visits: count,

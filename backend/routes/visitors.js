@@ -125,7 +125,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
             query.tenant_id = req.user.tenant_id;
         }
 
-        if (req.user.realm_id) {
+        if (req.user.realm_id && req.user.role !== 'tenant_admin') {
             query.realm_id = req.user.realm_id;
         }
 

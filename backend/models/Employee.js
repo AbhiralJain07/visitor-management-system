@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const employeeSchema = new mongoose.Schema({
     name: {
@@ -34,9 +35,20 @@ const employeeSchema = new mongoose.Schema({
     office_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Office'
+    },
+    last_login: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
+});
+
+// Hash password before saving if it is modified
+employeeSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
 });
 
 module.exports = mongoose.model('Employee', employeeSchema);

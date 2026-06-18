@@ -172,7 +172,17 @@ router.post('/login', async (req, res) => {
         const { email, password } = req.body;
         const normalizedEmail = email ? email.trim().toLowerCase() : '';
 
-        const user = await User.findOne({ email: normalizedEmail });
+        let user = await User.findOne({ email: normalizedEmail });
+        let isEmployee = false;
+
+        if (!user) {
+            const Employee = require('../models/Employee');
+            user = await Employee.findOne({ email: normalizedEmail }).populate('office_id');
+            if (user) {
+                isEmployee = true;
+            }
+        }
+
         if (!user) {
             // Failed login bhi log karo!
             await createAuditLog({
@@ -189,7 +199,10 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = (user.password && user.password.startsWith('$2'))
+            ? await bcrypt.compare(password, user.password)
+            : password === user.password;
+
         if (!isMatch) {
             // Wrong password bhi log karo!
             await createAuditLog({
@@ -200,7 +213,7 @@ router.post('/login', async (req, res) => {
                 description: `Wrong password attempt: ${email}`,
                 ip_address: req.ip,
                 status: 'failed',
-                tenant_id: user.tenant_id
+                tenant_id: isEmployee ? (user.office_id ? user.office_id.tenant_id : null) : user.tenant_id
             });
             return res.status(400).json({
                 success: false,
@@ -211,13 +224,16 @@ router.post('/login', async (req, res) => {
         user.last_login = new Date();
         await user.save();
 
+        const userTenantId = isEmployee ? (user.office_id ? user.office_id.tenant_id : null) : user.tenant_id;
+        const userRealmId = isEmployee ? (user.office_id ? user.office_id._id : null) : user.realm_id;
+
         const token = jwt.sign(
             {
                 id: user._id,
-                role: user.role,
-                tenant_id: user.tenant_id,
-                realm_id: user.realm_id,
-                language: user.language
+                role: user.role || 'employee',
+                tenant_id: userTenantId,
+                realm_id: userRealmId,
+                language: user.language || 'en'
             },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
@@ -229,13 +245,13 @@ router.post('/login', async (req, res) => {
             user_email: user.email,
             action: 'LOGIN',
             module: 'auth',
-            description: `${user.name} logeed in successfully`,
+            description: `${user.name} logged in successfully`,
             ip_address: req.ip,
             status: 'success',
-            tenant_id: user.tenant_id,
+            tenant_id: userTenantId,
             metadata: {
-                role: user.role,
-                realm_id: user.realm_id
+                role: user.role || 'employee',
+                realm_id: userRealmId
             }
         });
 
@@ -246,10 +262,10 @@ router.post('/login', async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role,
-                tenant_id: user.tenant_id,
-                realm_id: user.realm_id,
-                language: user.language
+                role: user.role || 'employee',
+                tenant_id: userTenantId,
+                realm_id: userRealmId,
+                language: user.language || 'en'
             }
         });
 
