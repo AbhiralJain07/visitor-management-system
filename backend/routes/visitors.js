@@ -116,7 +116,7 @@ const { createAuditLog } = require('../middleware/auditLog');
 
 // GET — Sabhi visitors
 // GET — Sabhi visitors (Search + Filter + Pagination)
-router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), async (req, res) => {
+router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security', 'employee'), async (req, res) => {
     try {
         let query = {};
 
@@ -177,7 +177,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), 
 router.post(
     '/',
     auth,
-    checkRole('super_admin', 'tenant_admin', 'receptionist'),
+    checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security', 'employee'),
     upload.single('photo'),
     async (req, res) => {
         try {
@@ -265,7 +265,7 @@ router.post(
     }
 );
 // POST — Face recognition
-router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), upload.single('photo'), async (req, res) => {
+router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security', 'employee'), upload.single('photo'), async (req, res) => {
     try {
         const base64Image = req.file.buffer.toString('base64');
         const faceResult = await getEmbedding(base64Image);
@@ -325,7 +325,7 @@ router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'recepti
 });
 
 // PUT — Visitor update
-router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
+router.put('/:id', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security'), async (req, res) => {
     try {
         const visitor = await Visitor.findByIdAndUpdate(
             req.params.id,
@@ -340,7 +340,7 @@ router.put('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, r
 });
 
 // DELETE — Visitor delete
-router.delete('/:id', auth, checkRole('super_admin'), async (req, res) => {
+router.delete('/:id', auth, checkRole('super_admin', 'tenant_admin'), async (req, res) => {
     try {
         const visitor = await Visitor.findByIdAndDelete(req.params.id);
         if (!visitor) return res.status(404).json({ success: false, message: 'Visitor not found!' });

@@ -4,10 +4,21 @@ import type { Visit, VisitFilters, CreateVisitDTO, UpdateVisitDTO, PaginatedResp
 export const VisitService = {
   async getAll(filters?: VisitFilters): Promise<PaginatedResponse<Visit> | Visit[]> {
     const response = await httpClient.get<any>('/visits', { params: filters });
-    if (response.data && typeof response.data.total === 'number') {
-      return response.data as PaginatedResponse<Visit>;
+    const res = response.data;
+    if (res && res.pagination && typeof res.pagination.total === 'number') {
+      return {
+        success: res.success,
+        data: res.data,
+        total: res.pagination.total,
+        page: res.pagination.page,
+        limit: res.pagination.limit,
+        totalPages: res.pagination.pages,
+      } as PaginatedResponse<Visit>;
     }
-    return response.data.data as Visit[];
+    if (res && typeof res.total === 'number') {
+      return res as PaginatedResponse<Visit>;
+    }
+    return res.data as Visit[];
   },
 
   async create(dto: CreateVisitDTO): Promise<Visit> {

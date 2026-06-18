@@ -161,11 +161,31 @@ const { auth, checkRole } = require('../middleware/auth');
  */
 
 // GET — All employees with search, filter, pagination
-router.get('/', auth, checkRole('tenant_admin', 'manager'), async (req, res) => {
+router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist', 'employee', 'security'), async (req, res) => {
     try {
         const { search, role, department, office_id, page = 1, limit = 50 } = req.query;
 
         const query = {};
+
+        // Tenant filtration (Employees are isolated by tenant's offices)
+        if (req.user.role !== 'super_admin') {
+            const Office = require('../models/Office');
+            const tenantOffices = await Office.find({ tenant_id: req.user.tenant_id }).select('_id');
+            const officeIds = tenantOffices.map(o => o._id);
+            
+            if (office_id && office_id !== 'all') {
+                // Check if requested office belongs to user's tenant
+                if (officeIds.map(String).includes(String(office_id))) {
+                    query.office_id = office_id;
+                } else {
+                    query.office_id = null; // No match
+                }
+            } else {
+                query.office_id = { $in: officeIds };
+            }
+        } else if (office_id && office_id !== 'all') {
+            query.office_id = office_id;
+        }
 
         if (search) {
             query.$or = [
@@ -177,7 +197,6 @@ router.get('/', auth, checkRole('tenant_admin', 'manager'), async (req, res) => 
 
         if (role && role !== 'all') query.role = role;
         if (department && department !== 'all') query.department = { $regex: department, $options: 'i' };
-        if (office_id && office_id !== 'all') query.office_id = office_id;
 
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 50;

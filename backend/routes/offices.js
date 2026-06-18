@@ -132,7 +132,7 @@ const { auth, checkRole } = require('../middleware/auth');
  */
 
 // GET — All offices with search, filter, pagination
-router.get('/', auth, checkRole('tenant_admin', 'manager'), async (req, res) => {
+router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist', 'employee', 'security'), async (req, res) => {
     try {
         const { search, is_active, page = 1, limit = 50 } = req.query;
 

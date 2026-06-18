@@ -95,7 +95,7 @@ const { createAuditLog } = require('../middleware/auditLog');
  */
 
 // GET — Visits list
-router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', 'employee'), async (req, res) => {
+router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security', 'employee'), async (req, res) => {
     try {
         let query = {};
 
@@ -154,7 +154,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', '
 });
 
 // POST — Create new visit
-router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist'), async (req, res) => {
+router.post('/', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security', 'employee'), async (req, res) => {
     try {
         const { visitor_id, host_id, purpose, purpose_id } = req.body;
 
@@ -206,7 +206,7 @@ Approve the visit!`;
 });
 
 // PUT — Visit update
-router.put('/:id', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', 'employee'), async (req, res) => {
+router.put('/:id', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'receptionist', 'security', 'employee'), async (req, res) => {
     try {
         const visit = await Visit.findByIdAndUpdate(
             req.params.id,
