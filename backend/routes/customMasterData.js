@@ -45,6 +45,86 @@ const toFrontend = (item, typeCode) => ({
   createdAt: item.createdAt,
 });
 
+/**
+ * @swagger
+ * /api/custom-master-data:
+ *   get:
+ *     summary: Get list of custom master data (purpose and department)
+ *     tags: [CustomMasterData]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Custom master data fetched successfully
+ *   post:
+ *     summary: Create new custom master data item
+ *     tags: [CustomMasterData]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - type
+ *               - name
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [purpose, department]
+ *               name:
+ *                 type: string
+ *               sortOrder:
+ *                 type: integer
+ *               is_active:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Custom master data item created successfully
+ * /api/custom-master-data/{id}:
+ *   put:
+ *     summary: Update custom master data item
+ *     tags: [CustomMasterData]
+ *     security:
+ *       - bearerAuth: []
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               sortOrder:
+ *                 type: integer
+ *               is_active:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Custom master data item updated successfully
+ *   delete:
+ *     summary: Delete custom master data item
+ *     tags: [CustomMasterData]
+ *     security:
+ *       - bearerAuth: []
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Custom master data item deleted successfully
+ */
+
 // GET /api/custom-master-data
 router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'receptionist', 'manager', 'employee', 'security'), async (req, res) => {
   try {

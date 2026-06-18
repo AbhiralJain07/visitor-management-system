@@ -7,6 +7,27 @@ const Employee = require('../models/Employee');
 const Visitor = require('../models/Visitor');
 const { auth, checkRole } = require('../middleware/auth');
 
+/**
+ * @swagger
+ * /api/search:
+ *   get:
+ *     summary: Universal search for super admin
+ *     tags: [Search]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         description: Search query matching tenants, master types, or master data names/codes
+ *     responses:
+ *       200:
+ *         description: List of search results matching the query
+ *       500:
+ *         description: Internal server error
+ */
+
 // GET /api/search?query=xxx — Universal search for super admin
 router.get('/', auth, checkRole('super_admin', 'auditor', 'support_admin'), async (req, res) => {
     try {

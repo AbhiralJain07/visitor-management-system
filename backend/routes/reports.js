@@ -6,6 +6,34 @@ const Employee = require('../models/Employee');
 const Office = require('../models/Office');
 const { auth, checkRole } = require('../middleware/auth');
 
+/**
+ * @swagger
+ * /api/reports:
+ *   get:
+ *     summary: Fetch tenant-level reports summary
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for reporting (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date for reporting (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Report stats and trends fetched successfully
+ *       500:
+ *         description: Internal server error
+ */
+
 // GET /api/reports — Tenant-level reports summary
 router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist'), async (req, res) => {
     try {
