@@ -116,7 +116,7 @@ http://localhost:8080/api-docs
 | Add Visitors | ✅ | ✅ | ✅ | ❌ |
 | Face Identify | ✅ | ✅ | ✅ | ❌ |
 | Create Visits | ✅ | ✅ | ✅ | ❌ |
-| Approve/Reject | ✅ | ✅ | ✅ | ✅ |
+| Approve/Reject | ✅ | ✅ | ✅ | ✅ |yh
 | View Own Visits | ✅ | ✅ | ✅ | ✅ |
 | Blacklist Visitor | ✅ | ✅ | ❌ | ❌ |
 | Global Reports | ✅ | ❌ | ❌ | ❌ |
