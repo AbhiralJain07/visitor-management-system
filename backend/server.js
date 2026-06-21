@@ -118,7 +118,7 @@ mongoose.connect(process.env.MONGODB_URI)
         console.log('Database error:', error);
     });
 
-const PORT = process.env.FRONTEND_URL || 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server ${PORT} is running! 🚀`);
 });
