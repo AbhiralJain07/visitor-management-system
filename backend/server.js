@@ -9,6 +9,9 @@ const rateLimit = require('express-rate-limit');
 dotenv.config();
 
 const app = express(); // ← PEHLE app banao!
+app.set('trust proxy', 1);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Rate Limiters
 const globalLimiter = rateLimit({
@@ -30,13 +33,15 @@ const loginLimiter = rateLimit({
 });
 
 // Middleware
-// CORS 
+// CORS - Dynamic origin support for Vercel (all previews + production) and localhost
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'http://localhost:5174'
+  'http://localhost:5174',
+  'https://visitor-management-system-ochre.vercel.app'
 ];
 
+// Support custom domain via environment variable (comma-separated)
 if (process.env.FRONTEND_URL) {
   const urls = process.env.FRONTEND_URL.split(',').map(url => url.trim());
   urls.forEach(url => {
@@ -50,13 +55,13 @@ if (process.env.FRONTEND_URL) {
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl requests, server-to-server)
     if (!origin) return callback(null, true);
-    
-    const isAllowed = allowedOrigins.includes(origin) || 
-                      origin.startsWith('http://localhost:') || 
+
+    const isAllowed = allowedOrigins.includes(origin) ||
+                      origin.startsWith('http://localhost:') ||
                       origin.endsWith('.vercel.app');
-                      
+
     if (isAllowed) {
       callback(null, true);
     } else {
@@ -68,7 +73,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
 
 // Swagger Setup
 const swaggerOptions = {
