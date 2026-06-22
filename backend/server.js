@@ -10,6 +10,8 @@ dotenv.config();
 
 const app = express(); // ← PEHLE app banao!
 app.set('trust proxy', 1);
+app.use(express.json()); // ← ADD THIS
+app.use(express.urlencoded({ extended: true })); // ← AND THIS
 
 // Rate Limiters
 const globalLimiter = rateLimit({
