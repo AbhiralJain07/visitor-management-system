@@ -38,7 +38,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://visitor-management-system-eta.vercel.app',
+    'https://visitor-management-system-qh7dam8nm-abhiraljain07s-projects.vercel.app/login',
     'https://visitor-management-system-ochre.vercel.app'
   ],
   credentials: true,
