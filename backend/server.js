@@ -33,7 +33,7 @@ const loginLimiter = rateLimit({
 });
 
 // Middleware
-// CORS - Dynamic origin support for Vercel (all previews + production) and localhost
+// CORS - Dynamic origin support for all Vercel URLs (previews + production) and localhost
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
@@ -55,7 +55,7 @@ if (process.env.FRONTEND_URL) {
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests, server-to-server)
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
 
     const isAllowed = allowedOrigins.includes(origin) ||
