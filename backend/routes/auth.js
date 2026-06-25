@@ -221,6 +221,51 @@ router.post('/login', async (req, res) => {
             });
         }
 
+        // ── SUSPENSION CHECKS ──────────────────────────────────────────
+        // 1. Check if the user account itself is suspended/inactive
+        if (user.is_active === false) {
+            await createAuditLog({
+                user_id: user._id,
+                user_email: user.email,
+                action: 'LOGIN',
+                module: 'auth',
+                description: `Blocked login - user account suspended: ${normalizedEmail}`,
+                ip_address: req.ip,
+                status: 'failed',
+            });
+            return res.status(403).json({
+                success: false,
+                message: 'Your account has been suspended. Please contact your administrator.'
+            });
+        }
+
+        // 2. For tenant users (not super_admin), check if their tenant is suspended
+        const userTenantIdForCheck = isEmployee
+            ? (user.office_id ? user.office_id.tenant_id : null)
+            : user.tenant_id;
+
+        if (userTenantIdForCheck) {
+            const Tenant = require('../models/Tenant');
+            const tenant = await Tenant.findById(userTenantIdForCheck);
+            if (tenant && tenant.status === 'Suspended') {
+                await createAuditLog({
+                    user_id: user._id,
+                    user_email: user.email,
+                    action: 'LOGIN',
+                    module: 'auth',
+                    description: `Blocked login - tenant suspended: ${normalizedEmail}`,
+                    ip_address: req.ip,
+                    status: 'failed',
+                    tenant_id: userTenantIdForCheck
+                });
+                return res.status(403).json({
+                    success: false,
+                    message: 'Your organization account has been suspended. Please contact your administrator or renew your subscription.'
+                });
+            }
+        }
+        // ───────────────────────────────────────────────────────────────
+
         user.last_login = new Date();
         await user.save();
 

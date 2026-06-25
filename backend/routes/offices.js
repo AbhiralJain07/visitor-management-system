@@ -215,19 +215,43 @@ router.put('/:id', auth, checkRole('tenant_admin', 'manager'), async (req, res) 
     }
 });
 
-// DELETE — Delete office
+// DELETE → SOFT DELETE — Suspend office (sets is_active: false, data preserved)
 router.delete('/:id', auth, checkRole('tenant_admin', 'manager'), async (req, res) => {
     try {
-        const office = await Office.findOneAndDelete({
-            _id: req.params.id,
-            tenant_id: req.user.tenant_id
-        });
+        const office = await Office.findOneAndUpdate(
+            { _id: req.params.id, tenant_id: req.user.tenant_id },
+            { is_active: false },
+            { new: true }
+        );
 
         if (!office) {
             return res.status(404).json({ success: false, message: 'Office not found or unauthorized!' });
         }
 
-        res.json({ success: true, message: 'Office deleted successfully!' });
+        res.json({ success: true, message: 'Office suspended successfully! Data is preserved.', data: office });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// PATCH /:id/toggle-status — Suspend or Activate office
+router.patch('/:id/toggle-status', auth, checkRole('tenant_admin', 'manager'), async (req, res) => {
+    try {
+        const office = await Office.findOne({ _id: req.params.id, tenant_id: req.user.tenant_id });
+
+        if (!office) {
+            return res.status(404).json({ success: false, message: 'Office not found or unauthorized!' });
+        }
+
+        office.is_active = !office.is_active;
+        await office.save();
+
+        const action = office.is_active ? 'activated' : 'suspended';
+        res.json({
+            success: true,
+            message: `Office ${action} successfully!`,
+            data: office
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

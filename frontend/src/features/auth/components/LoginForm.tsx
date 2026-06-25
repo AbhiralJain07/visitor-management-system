@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
-import { User, KeyRound, Eye, EyeOff, Loader2, AlertCircle, Building2 } from 'lucide-react';
+import { User, KeyRound, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { loginSchema, type LoginFields } from '../schemas/authSchemas';
 
 
@@ -14,12 +14,7 @@ interface LoginFormProps {
   onRegisterToggle: () => void;
 }
 
-const DEFAULT_COMPANIES = [
-  { _id: 't1', name: 'Acme Corporate Solutions' },
-  { _id: 't2', name: 'Zenith Tech Hubs' },
-  { _id: 't3', name: 'Vanguard FinTech' },
-  { _id: 't4', name: 'Starlight Retailers' },
-  { _id: 't5', name: 'Apex Manufacturing' }
+const PLACEHOLDER_REMOVED = [
 ];
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -30,27 +25,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onRegisterToggle,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [tenants, setTenants] = useState<{_id: string, name: string}[]>([]);
-
-    useEffect(() => {
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-    fetch(`${apiBase}/tenants/public`)
-    .then(r => r.json())
-    .then(res => { if (res.success) setTenants(res.data); })
-    .catch(() => {});
-    }, []);
 
   const isHindi = language === 'hi';
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      company: '',
       username: '',
       password: '',
       rememberMe: false,
@@ -59,17 +43,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
-  };
-
-  const companiesList = tenants && tenants.length > 0 ? tenants : DEFAULT_COMPANIES;
-
-  const [companyOpen, setCompanyOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<{ _id: string, name: string } | null>(null);
-
-  const selectCompanyOption = (c: { _id: string, name: string }) => {
-    setSelectedCompany(c);
-    setValue('company', c._id, { shouldValidate: true });
-    setCompanyOpen(false);
   };
 
   return (
@@ -83,76 +56,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Company Custom Dropdown Field */}
-        <div className="space-y-1">
-          <label
-            htmlFor="login-company"
-            className="text-xs font-semibold text-slate-700 block transition-colors"
-          >
-            {isHindi ? 'कंपनी' : 'Company'}
-          </label>
-          <input type="hidden" {...register('company')} />
-          <div className="relative">
-            <button
-              id="login-company"
-              type="button"
-              disabled={isLoading}
-              onClick={() => setCompanyOpen(!companyOpen)}
-              className={`w-full text-left text-sm bg-slate-50 border rounded-xl pl-10 pr-10 py-3 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-60 min-h-[44px] flex items-center justify-between ${
-                errors.company ? 'border-red-300 ring-red-500 bg-red-50/10' : 'border-slate-200'
-              }`}
-            >
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                <Building2 size={16} />
-              </span>
-              <span className={selectedCompany ? 'text-slate-900 font-medium' : 'text-slate-400'}>
-                {selectedCompany
-                  ? selectedCompany.name
-                  : isHindi
-                  ? 'अपनी कंपनी चुनें'
-                  : 'Select your company'}
-              </span>
-              <span className="text-slate-400 text-[9px]">▼</span>
-            </button>
-
-            {companyOpen && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setCompanyOpen(false)} />
-                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-40 max-h-56 overflow-y-auto custom-scrollbar animate-scaleIn">
-                  {companiesList.map((c) => (
-                    <button
-                      key={c._id}
-                      type="button"
-                      onClick={() => selectCompanyOption(c)}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 transition-colors flex items-center justify-between ${
-                        selectedCompany?._id === c._id ? 'text-blue-600 bg-blue-50/40' : 'text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Building2 size={14} className="text-slate-400 shrink-0" />
-                        <span>{c.name}</span>
-                      </div>
-                      {selectedCompany?._id === c._id && <span className="text-blue-500 font-bold">✓</span>}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-          {errors.company && (
-            <p className="text-[11px] font-medium text-red-600 animate-fadeIn">
-              {errors.company.message}
-            </p>
-          )}
-        </div>
-
-        {/* Username Field */}
+        {/* Email Field */}
         <div className="space-y-1">
           <label
             htmlFor="login-username"
             className="text-xs font-semibold text-slate-700 block transition-colors"
           >
-            {isHindi ? 'उपयोगकर्ता नाम' : 'Username'}
+            {isHindi ? 'ईमेल पता' : 'Email Address'}
           </label>
           <div className="relative group">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
@@ -160,10 +70,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             </span>
             <input
               id="login-username"
-              type="text"
+              type="email"
               disabled={isLoading}
-              placeholder={isHindi ? 'अपना उपयोगकर्ता नाम दर्ज करें' : 'Enter your username'}
-              autoComplete="username"
+              placeholder={isHindi ? 'अपना ईमेल दर्ज करें' : 'Enter your email address'}
+              autoComplete="email"
               {...register('username')}
               className={`w-full text-sm bg-slate-50 border rounded-xl pl-10 pr-4 py-3 focus:bg-white focus:outline-none focus:ring-1 transition-all disabled:opacity-60 min-h-[44px] ${
                 errors.username

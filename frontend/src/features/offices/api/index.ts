@@ -28,3 +28,9 @@ export const deleteOffice = async (id: string): Promise<ApiResponse<{ message: s
   const response = await httpClient.delete<ApiResponse<{ message: string }>>(`/offices/${id}`);
   return response.data;
 };
+
+/** Soft delete toggle: suspends if active, activates if suspended */
+export const toggleOfficeStatus = async (id: string): Promise<ApiResponse<Office>> => {
+  const response = await httpClient.patch<ApiResponse<Office>>(`/offices/${id}/toggle-status`);
+  return response.data;
+};

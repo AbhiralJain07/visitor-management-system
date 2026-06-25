@@ -4,9 +4,31 @@ const Visitor = require('../models/Visitor');
 const { auth, checkRole } = require('../middleware/auth');
 const { upload, uploadPhoto } = require('../cloudinary');
 const { getEmbedding, compareFaces } = require('../faceService');
-const { createAuditLog } = require('../middleware/auditLog'); 
+const { createAuditLog } = require('../middleware/auditLog');
 
 /**
+ * Masks an ID number — shows only last 4 digits.
+ * e.g. "987654321012" → "XXXX-XXXX-1012" (Aadhaar)
+ * e.g. "AB1234567" → "XXXXX567" (others)
+ */
+const maskIdNumber = (idNum) => {
+    if (!idNum || typeof idNum !== 'string' || idNum.length === 0) return '';
+    const clean = idNum.replace(/[\s-]/g, '');
+    if (clean.length <= 4) return idNum; // Too short to mask
+    const last4 = clean.slice(-4);
+    // Aadhaar format: XXXX-XXXX-XXXX
+    if (clean.length === 12) return `XXXX-XXXX-${last4}`;
+    const maskedLen = clean.length - 4;
+    return 'X'.repeat(maskedLen) + last4;
+};
+
+const applyMask = (visitor) => {
+    if (!visitor) return visitor;
+    const obj = visitor.toObject ? visitor.toObject() : { ...visitor };
+    if (obj.id_number) obj.id_number = maskIdNumber(obj.id_number);
+    return obj;
+};
+
  * @swagger
  * /api/visitors:
  *   get:
@@ -160,7 +182,7 @@ router.get('/', auth, checkRole('super_admin', 'tenant_admin', 'manager', 'recep
 
         res.json({
             success: true,
-            data: visitors,
+            data: visitors.map(applyMask),
             pagination: {
                 total,
                 page,
@@ -198,7 +220,7 @@ router.post(
             // ==========================
             // Request Body Sanitization
             // ==========================
-            const { name, phone, id_number } = req.body;
+            const { name, phone, id_number, id_type, email, company_name, address } = req.body;
 
             const visitorName = name ? name.trim() : '';
             const visitorPhone = phone ? phone.trim() : '';
@@ -207,11 +229,11 @@ router.post(
             console.log('Body:', req.body);
             console.log('File:', req.file ? 'File received' : 'No file');
 
-            // Optional Validation
-            if (!visitorName || !visitorPhone || !visitorIdNumber) {
+            // Optional Validation — only name and phone are required now
+            if (!visitorName || !visitorPhone) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Name, phone and ID number are required'
+                    message: 'Name and phone number are required'
                 });
             }
 
@@ -241,6 +263,10 @@ router.post(
                 name: visitorName,
                 phone: visitorPhone,
                 id_number: visitorIdNumber,
+                id_type: id_type || 'Aadhaar',
+                email: email ? email.trim() : '',
+                company_name: company_name ? company_name.trim() : '',
+                address: address ? address.trim() : '',
                 photo_url,
                 face_data,
                 tenant_id: req.user.tenant_id,
@@ -251,7 +277,7 @@ router.post(
 
             res.status(201).json({
                 success: true,
-                data: visitor
+                data: applyMask(visitor)
             });
 
         } catch (error) {
@@ -304,7 +330,7 @@ router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'manager
                     success: true,
                     found: true,
                     blacklisted: true,
-                    visitor: matchedVisitor,
+                    visitor: applyMask(matchedVisitor),
                     message: `⚠️ ALERT! ${matchedVisitor.name} blacklisted!`
                 });
             }
@@ -312,7 +338,7 @@ router.post('/identify', auth, checkRole('super_admin', 'tenant_admin', 'manager
                 success: true,
                 found: true,
                 similarity: highestSimilarity,
-                visitor: matchedVisitor,
+                visitor: applyMask(matchedVisitor),
                 message: `Welcome back ${matchedVisitor.name}! 👋`
             });
         }

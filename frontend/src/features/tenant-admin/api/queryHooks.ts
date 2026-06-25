@@ -523,28 +523,32 @@ export const useOffices = (filters?: OfficeFilters) => {
 
       if (isOnline && serverAlive && !id.startsWith('local-')) {
         try {
-          await OfficeService.delete(id);
+          await OfficeService.delete(id); // Calls PATCH soft-delete on server
         } catch (error) {
-          console.error('Failed to delete office on server:', error);
+          console.error('Failed to suspend office on server:', error);
         }
       }
 
-      await db.offices.delete(id);
+      // Soft delete locally — mark as inactive instead of removing
+      const existing = await db.offices.get(id);
+      if (existing) {
+        await db.offices.put({ ...existing, is_active: false });
+      }
       return id;
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ['offices', filters] });
       const previousOffices = queryClient.getQueryData(['offices', filters]);
 
+      // Optimistically mark as suspended in the UI
       queryClient.setQueryData(['offices', filters], (old: any) => {
         if (!old) return [];
         if (Array.isArray(old)) {
-          return old.filter(o => o._id !== id);
+          return old.map(o => o._id === id ? { ...o, is_active: false } : o);
         }
         return {
           ...old,
-          data: old.data.filter((o: any) => o._id !== id),
-          total: Math.max((old.total || 0) - 1, 0),
+          data: old.data.map((o: any) => o._id === id ? { ...o, is_active: false } : o),
         };
       });
 
@@ -559,6 +563,42 @@ export const useOffices = (filters?: OfficeFilters) => {
       queryClient.invalidateQueries({ queryKey: ['offices'] });
     },
   });
+
+  // Toggle office status (suspend/activate)
+  const toggleOfficeStatusMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const isOnline = getIsOnline();
+      const serverAlive = isOnline ? await checkBackend() : false;
+
+      if (isOnline && serverAlive && !id.startsWith('local-')) {
+        const res = await httpClient.patch(`/offices/${id}/toggle-status`);
+        const updated = res.data?.data as OfficeRealm;
+        if (updated) {
+          await db.offices.put({
+            _id: updated._id,
+            name: updated.name,
+            city: updated.city,
+            address: updated.address,
+            is_active: updated.is_active,
+          });
+          return updated;
+        }
+      }
+
+      // Offline toggle
+      const existing = await db.offices.get(id);
+      if (existing) {
+        const toggled = { ...existing, is_active: !existing.is_active };
+        await db.offices.put(toggled);
+        return toggled as unknown as OfficeRealm;
+      }
+      return null;
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['offices'] });
+    },
+  });
+
 
   // Extract pagination results or fallback array
   const rawData = officesQuery.data;
@@ -583,6 +623,8 @@ export const useOffices = (filters?: OfficeFilters) => {
     isUpdating: updateOfficeMutation.isPending,
     deleteOffice: deleteOfficeMutation.mutateAsync,
     isDeleting: deleteOfficeMutation.isPending,
+    toggleOfficeStatus: toggleOfficeStatusMutation.mutateAsync,
+    isToggling: toggleOfficeStatusMutation.isPending,
   };
 };
 
