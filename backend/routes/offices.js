@@ -110,26 +110,7 @@ const { auth, checkRole } = require('../middleware/auth');
  *         description: Office not found or unauthorized
  *       500:
  *         description: Internal server error
- *   delete:
- *     summary: Delete office
- *     tags: [Offices]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Office ID to delete
- *     responses:
- *       200:
- *         description: Office deleted successfully!
- *       404:
- *         description: Office not found or unauthorized
- *       500:
- *         description: Internal server error
- */
+ * */
 
 // GET — All offices with search, filter, pagination
 router.get('/', auth, checkRole('tenant_admin', 'manager', 'receptionist', 'employee', 'security'), async (req, res) => {
@@ -210,25 +191,6 @@ router.put('/:id', auth, checkRole('tenant_admin', 'manager'), async (req, res) 
         }
 
         res.json({ success: true, message: 'Office updated successfully!', data: office });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// DELETE → SOFT DELETE — Suspend office (sets is_active: false, data preserved)
-router.delete('/:id', auth, checkRole('tenant_admin', 'manager'), async (req, res) => {
-    try {
-        const office = await Office.findOneAndUpdate(
-            { _id: req.params.id, tenant_id: req.user.tenant_id },
-            { is_active: false },
-            { new: true }
-        );
-
-        if (!office) {
-            return res.status(404).json({ success: false, message: 'Office not found or unauthorized!' });
-        }
-
-        res.json({ success: true, message: 'Office suspended successfully! Data is preserved.', data: office });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

@@ -24,8 +24,8 @@ export const updateOffice = async (id: string, payload: Partial<Office>): Promis
   return response.data;
 };
 
-export const deleteOffice = async (id: string): Promise<ApiResponse<{ message: string }>> => {
-  const response = await httpClient.delete<ApiResponse<{ message: string }>>(`/offices/${id}`);
+export const deleteOffice = async (id: string): Promise<ApiResponse<Office>> => {
+  const response = await httpClient.put<ApiResponse<Office>>(`/offices/${id}`, { is_active: false });
   return response.data;
 };
 
