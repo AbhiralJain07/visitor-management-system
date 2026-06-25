@@ -29,6 +29,7 @@ const applyMask = (visitor) => {
     return obj;
 };
 
+/**
  * @swagger
  * /api/visitors:
  *   get:
