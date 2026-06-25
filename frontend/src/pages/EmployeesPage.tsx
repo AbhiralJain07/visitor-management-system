@@ -411,45 +411,123 @@ export const EmployeesPage: React.FC = () => {
         {/* Details Drawer */}
         {selectedEmployee && (
           <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-2xl space-y-6 fixed inset-x-0 bottom-0 top-16 md:inset-y-0 md:right-0 md:left-auto md:w-[460px] lg:relative lg:inset-auto lg:w-auto lg:col-span-1 z-50 overflow-y-auto custom-scrollbar">
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-sm font-bold text-slate-800">Employee Profile</h2>
+              <h2 className="text-sm font-bold text-slate-800">Worker Profile</h2>
               <button
                 onClick={() => setSelectedEmployee(null)}
                 className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
               ><X size={16} /></button>
             </div>
+
             <div className="space-y-5">
-              <div className="flex items-center space-x-3.5">
-                <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 font-extrabold text-sm shrink-0">
+              {/* Avatar + Name + Status */}
+              <div className="flex flex-col items-center text-center gap-3 bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl p-5 border border-slate-100">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xl shadow-lg shadow-blue-500/20 shrink-0">
                   {selectedEmployee.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 text-sm leading-snug">{selectedEmployee.name}</h3>
+                  <h3 className="font-bold text-slate-800 text-base leading-snug">{selectedEmployee.name}</h3>
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">
-                    {selectedEmployee.department || 'Administration'} / {selectedEmployee.role}
+                    {selectedEmployee.department || 'General'} Division
                   </p>
                 </div>
+                {/* Role + Status badges */}
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                  <span className={`inline-flex items-center text-[9px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wide ${
+                    selectedEmployee.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                    selectedEmployee.role === 'manager' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                    selectedEmployee.role === 'receptionist' ? 'bg-green-50 text-green-700 border-green-200' :
+                    selectedEmployee.role === 'security' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                    'bg-slate-100 text-slate-600 border-slate-200'
+                  }`}>
+                    {selectedEmployee.role}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2.5 py-1 rounded-full border ${
+                    selectedEmployee.is_active !== false
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-red-50 text-red-700 border-red-200'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedEmployee.is_active !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                    {selectedEmployee.is_active !== false ? 'Active' : 'Suspended'}
+                  </span>
+                </div>
               </div>
-              <div className="border-t border-slate-50 pt-4 space-y-3">
+
+              {/* Contact & Professional Details */}
+              <div className="space-y-3 border border-slate-100 rounded-xl p-4">
+                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Contact Information</h4>
+
                 <div className="flex items-center space-x-2.5 text-xs">
-                  <Mail size={14} className="text-slate-400" />
-                  <span className="text-slate-600 font-semibold truncate">{selectedEmployee.email}</span>
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                    <Mail size={12} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase">Email</p>
+                    <span className="text-slate-700 font-semibold truncate block max-w-[280px]">{selectedEmployee.email}</span>
+                  </div>
                 </div>
+
                 <div className="flex items-center space-x-2.5 text-xs">
-                  <Phone size={14} className="text-slate-400" />
-                  <span className="text-slate-600 font-semibold">{selectedEmployee.phone || 'No phone registered'}</span>
+                  <div className="w-7 h-7 rounded-lg bg-green-50 text-green-500 flex items-center justify-center shrink-0">
+                    <Phone size={12} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase">Phone</p>
+                    <span className="text-slate-700 font-semibold">{selectedEmployee.phone || 'Not registered'}</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2.5 text-xs">
-                  <Building size={14} className="text-slate-400" />
-                  <span className="text-slate-600 font-semibold">{getOfficeName(selectedEmployee.office_id)}</span>
-                </div>
+
                 {selectedEmployee.telegram_id && (
                   <div className="flex items-center space-x-2.5 text-xs">
-                    <span className="font-bold text-[10px] text-slate-400 uppercase">Telegram:</span>
-                    <span className="text-slate-600 font-mono font-bold">{selectedEmployee.telegram_id}</span>
+                    <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-500 flex items-center justify-center shrink-0 font-bold text-[10px]">
+                      TG
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">Telegram ID</p>
+                      <span className="text-slate-700 font-mono font-bold">{selectedEmployee.telegram_id}</span>
+                    </div>
                   </div>
                 )}
               </div>
+
+              {/* Office & Department Details */}
+              <div className="space-y-3 border border-slate-100 rounded-xl p-4">
+                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Work Assignment</h4>
+
+                <div className="flex items-center space-x-2.5 text-xs">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
+                    <Building size={12} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase">Office Branch</p>
+                    <span className="text-slate-700 font-semibold">{getOfficeName(selectedEmployee.office_id)}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Department</p>
+                    <p className="text-xs font-bold text-slate-700 mt-1">{selectedEmployee.department || 'General'}</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Employee ID</p>
+                    <p className="text-[10px] font-mono font-bold text-slate-600 mt-1">
+                      {selectedEmployee._id.slice(-8).toUpperCase()}
+                    </p>
+                  </div>
+                  {selectedEmployee.createdAt && (
+                    <div className="col-span-2 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Member Since</p>
+                      <p className="text-xs font-bold text-slate-700 mt-1">
+                        {new Date(selectedEmployee.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Admin Actions */}
               {isAdmin && (
                 <div className="border-t border-slate-50 pt-4 flex flex-col space-y-2">
                   <div className="flex gap-2">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Eye, Edit2, ShieldX, Check, Trash2, X, AlertTriangle, Users } from 'lucide-react';
+import { Plus, Eye, Edit2, ShieldX, Check, Trash2, X, AlertTriangle, Users, Copy, EyeOff, KeyRound } from 'lucide-react';
 import { useTenants, useCreateTenant, useUpdateTenant, useDeleteTenant } from '@/features/super-admin/api/queryHooks';
 import { tenantFormSchema, type TenantFormFields } from '@/features/super-admin/schemas';
 import { type TenantCompany, type SubscriptionPlan, type TenantStatus } from '@/features/super-admin/types';
@@ -37,6 +37,9 @@ export const TenantsPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [planChangeTenant, setPlanChangeTenant] = useState<{ id: string; currentPlan: SubscriptionPlan; newPlan: SubscriptionPlan } | null>(null);
+  const [adminCredentials, setAdminCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // React Hook Form for Company
   const {
@@ -58,6 +61,7 @@ export const TenantsPage: React.FC = () => {
       subscriptionPlan: 'Basic',
       maxUsers: 50,
       status: 'Active',
+      adminPassword: '',
     },
   });
 
@@ -74,6 +78,7 @@ export const TenantsPage: React.FC = () => {
       subscriptionPlan: 'Basic',
       maxUsers: 50,
       status: 'Active',
+      adminPassword: '',
     });
     setIsEditMode(false);
     setIsFormModalOpen(true);
@@ -91,6 +96,7 @@ export const TenantsPage: React.FC = () => {
       subscriptionPlan: company.subscriptionPlan,
       maxUsers: company.maxUsers,
       status: company.status,
+      adminPassword: '',
     });
     setIsEditMode(true);
     setSelectedTenant(company);
@@ -104,14 +110,27 @@ export const TenantsPage: React.FC = () => {
           id: selectedTenant._id,
           payload: data,
         });
+        setIsFormModalOpen(false);
+        setSelectedTenant(null);
       } else {
-        await createTenantMutation.mutateAsync(data);
+        const result = await createTenantMutation.mutateAsync(data);
+        setIsFormModalOpen(false);
+        setSelectedTenant(null);
+        // Show credentials modal if returned
+        if (result?.adminCredentials) {
+          setAdminCredentials(result.adminCredentials);
+          setShowAdminPassword(false);
+        }
       }
-      setIsFormModalOpen(false);
-      setSelectedTenant(null);
     } catch (error) {
       console.error('Failed to submit company details:', error);
     }
+  };
+
+  const handleCopyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const handleOpenDrawer = (company: TenantCompany) => {
@@ -490,6 +509,34 @@ export const TenantsPage: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Admin Password (only shown on create) */}
+                {!isEditMode && (
+                  <div className="space-y-1 sm:col-span-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-semibold text-slate-700 block">Initial Admin Password (Optional)</label>
+                      <span className="text-[10px] text-slate-400">Leave blank to auto-generate</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showAdminPassword ? 'text' : 'password'}
+                        {...register('adminPassword')}
+                        placeholder="••••••••"
+                        className={`w-full text-sm bg-slate-50/50 border border-slate-200 rounded-lg pl-3 pr-10 py-2 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all ${
+                          errors.adminPassword ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showAdminPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                    {errors.adminPassword && <p className="text-[10px] font-semibold text-red-600">{errors.adminPassword.message}</p>}
+                  </div>
+                )}
+
                 {/* Address */}
                 <div className="space-y-1 sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-700 block">Corporate Address</label>
@@ -692,6 +739,91 @@ export const TenantsPage: React.FC = () => {
         cancelText="Discard Change"
         variant="warning"
       />
+
+      {/* ==========================================================
+         ADMIN CREDENTIALS MODAL (shown after tenant creation)
+         ========================================================== */}
+      {adminCredentials && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={() => setAdminCredentials(null)} />
+          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl relative z-10 overflow-hidden animate-fadeIn">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-5 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                  <KeyRound size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">Tenant Created Successfully!</h3>
+                  <p className="text-xs text-emerald-100 mt-0.5">Admin login credentials — save them now</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Warning */}
+            <div className="mx-6 mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
+              <AlertTriangle size={15} className="text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700 font-medium leading-relaxed">
+                <strong>This password is shown only once.</strong> Copy and share it securely with the tenant admin. It cannot be retrieved later.
+              </p>
+            </div>
+
+            {/* Credentials */}
+            <div className="p-6 space-y-3">
+              {/* Email */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Login Email</label>
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                  <span className="text-sm font-semibold text-slate-800 flex-1 select-all">{adminCredentials.email}</span>
+                  <button
+                    onClick={() => handleCopyToClipboard(adminCredentials.email, 'email')}
+                    className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+                    title="Copy email"
+                  >
+                    {copiedField === 'email' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Login Password</label>
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                  <span className="text-sm font-bold text-emerald-800 flex-1 font-mono select-all tracking-wider">
+                    {adminCredentials.password}
+                  </span>
+                  <button
+                    onClick={() => handleCopyToClipboard(adminCredentials.password, 'password')}
+                    className="p-1.5 rounded-lg hover:bg-emerald-200 text-emerald-500 hover:text-emerald-700 transition-colors shrink-0"
+                    title="Copy password"
+                  >
+                    {copiedField === 'password' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Copy All */}
+              <button
+                onClick={() => handleCopyToClipboard(`Email: ${adminCredentials.email}\nPassword: ${adminCredentials.password}`, 'all')}
+                className="w-full mt-1 flex items-center justify-center gap-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl py-2.5 text-xs font-bold transition-colors"
+              >
+                {copiedField === 'all' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                {copiedField === 'all' ? 'Copied!' : 'Copy Both Credentials'}
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6">
+              <button
+                onClick={() => setAdminCredentials(null)}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm transition-colors"
+              >
+                I have saved the credentials — Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

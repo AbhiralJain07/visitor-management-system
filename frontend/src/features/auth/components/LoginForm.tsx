@@ -14,6 +14,12 @@ interface LoginFormProps {
   onRegisterToggle: () => void;
 }
 
+<<<<<<< HEAD
+=======
+const PLACEHOLDER_REMOVED = [
+];
+
+>>>>>>> ef3a2026fc24650d89be979bc659e0592c249768
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit,
   isLoading,
@@ -28,12 +34,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      company: '',
       username: '',
       password: '',
       rememberMe: false,
@@ -44,8 +48,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setShowPassword((prev) => !prev);
   };
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> ef3a2026fc24650d89be979bc659e0592c249768
   return (
     <div className="space-y-5">
       {/* API Level Credentials/Network Errors */}
@@ -57,15 +64,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+<<<<<<< HEAD
 
 
         {/* Username Field */}
+=======
+        {/* Email Field */}
+>>>>>>> ef3a2026fc24650d89be979bc659e0592c249768
         <div className="space-y-1">
           <label
             htmlFor="login-username"
             className="text-xs font-semibold text-slate-700 block transition-colors"
           >
+<<<<<<< HEAD
             {isHindi ? 'ईमेल / उपयोगकर्ता नाम' : 'Email/Username'}
+=======
+            {isHindi ? 'ईमेल पता' : 'Email Address'}
+>>>>>>> ef3a2026fc24650d89be979bc659e0592c249768
           </label>
           <div className="relative group">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
@@ -73,10 +88,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             </span>
             <input
               id="login-username"
-              type="text"
+              type="email"
               disabled={isLoading}
+<<<<<<< HEAD
               placeholder={isHindi ? 'अपना ईमेल या उपयोगकर्ता नाम दर्ज करें' : 'Enter your email or username'}
               autoComplete="username"
+=======
+              placeholder={isHindi ? 'अपना ईमेल दर्ज करें' : 'Enter your email address'}
+              autoComplete="email"
+>>>>>>> ef3a2026fc24650d89be979bc659e0592c249768
               {...register('username')}
               className={`w-full text-sm bg-slate-50 border rounded-xl pl-10 pr-4 py-3 focus:bg-white focus:outline-none focus:ring-1 transition-all disabled:opacity-60 min-h-[44px] ${
                 errors.username

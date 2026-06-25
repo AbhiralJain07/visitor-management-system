@@ -4,10 +4,13 @@ import { z } from 'zod';
  * Validation schema for the Login Form
  */
 export const loginSchema = z.object({
-  company: z.string().optional(),
   username: z
     .string()
+<<<<<<< HEAD
     .min(1, { message: 'Email/Username is required.' }),
+=======
+    .min(1, { message: 'Email is required.' }),
+>>>>>>> ef3a2026fc24650d89be979bc659e0592c249768
   password: z
     .string()
     .min(1, { message: 'Password is required.' })

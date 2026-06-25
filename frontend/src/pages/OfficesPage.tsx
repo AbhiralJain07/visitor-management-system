@@ -19,7 +19,7 @@ export const OfficesPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
 
-  const { offices, pagination, isLoading, createOffice, updateOffice, deleteOffice } = useOffices({
+  const { offices, pagination, isLoading, createOffice, updateOffice, deleteOffice, toggleOfficeStatus } = useOffices({
     page,
     limit,
     search: searchQuery,
@@ -87,17 +87,18 @@ export const OfficesPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  // Handle delete office
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  // Handle toggle suspend/activate office (soft delete)
+  const handleToggleStatus = async (office: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this office branch?')) {
+    const action = office.is_active ? 'suspend' : 'activate';
+    if (window.confirm(`Are you sure you want to ${action} this office branch? Data will be preserved.`)) {
       try {
-        await deleteOffice(id);
-        if (selectedOffice?._id === id) {
-          setSelectedOffice(null);
+        await toggleOfficeStatus(office._id);
+        if (selectedOffice?._id === office._id) {
+          setSelectedOffice((prev: any) => prev ? { ...prev, is_active: !prev.is_active } : null);
         }
       } catch (err) {
-        console.error('Delete failed:', err);
+        console.error('Toggle office status failed:', err);
       }
     }
   };
@@ -265,11 +266,15 @@ export const OfficesPage: React.FC = () => {
                                 <Edit2 size={14} />
                               </button>
                               <button
-                                onClick={(e) => handleDelete(office._id, e)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all"
-                                title="Delete Office"
+                                onClick={(e) => handleToggleStatus(office, e)}
+                                className={`p-1.5 rounded-lg border border-transparent transition-all ${
+                                  office.is_active
+                                    ? 'text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100'
+                                    : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100'
+                                }`}
+                                title={office.is_active ? 'Suspend Office' : 'Activate Office'}
                               >
-                                <Trash2 size={14} />
+                                <Power size={14} />
                               </button>
                             </>
                           )}
@@ -355,10 +360,15 @@ export const OfficesPage: React.FC = () => {
                           Edit
                         </button>
                         <button
-                          onClick={(e) => handleDelete(office._id, e)}
-                          className="min-h-[44px] flex items-center justify-center p-2.5 bg-red-50 border border-red-250 hover:bg-red-100 rounded-xl text-red-750 font-bold text-xs transition-colors"
+                          onClick={(e) => handleToggleStatus(office, e)}
+                          className={`min-h-[44px] flex items-center justify-center px-3 py-2 border rounded-xl font-bold text-xs transition-colors ${
+                            office.is_active
+                              ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-700'
+                              : 'bg-green-50 border-green-200 hover:bg-green-100 text-green-700'
+                          }`}
                         >
-                          <Trash2 size={13} />
+                          <Power size={13} className="mr-1" />
+                          {office.is_active ? 'Suspend' : 'Activate'}
                         </button>
                       </>
                     )}
@@ -467,11 +477,16 @@ export const OfficesPage: React.FC = () => {
                     Edit Office
                   </button>
                   <button
-                    onClick={(e) => handleDelete(selectedOffice._id, e)}
-                    className="flex items-center justify-center p-2.5 bg-red-50 hover:bg-red-100 border border-red-250 text-red-655 rounded-xl transition-all cursor-pointer min-h-[44px]"
-                    title="Delete Branch"
+                    onClick={(e) => handleToggleStatus(selectedOffice, e)}
+                    className={`flex items-center justify-center gap-1.5 px-3 py-2 border rounded-xl transition-all cursor-pointer min-h-[44px] text-xs font-bold ${
+                      selectedOffice.is_active
+                        ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700'
+                        : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700'
+                    }`}
+                    title={selectedOffice.is_active ? 'Suspend Branch' : 'Activate Branch'}
                   >
-                    <Trash2 size={14} />
+                    <Power size={14} />
+                    {selectedOffice.is_active ? 'Suspend' : 'Activate'}
                   </button>
                 </div>
               )}

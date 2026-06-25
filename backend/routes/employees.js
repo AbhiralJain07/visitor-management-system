@@ -260,6 +260,34 @@ router.post('/', auth, checkRole('tenant_admin', 'manager'), async (req, res) =>
     }
 });
 
+// GET /:id — Single employee detail (for profile view)
+router.get('/:id', auth, checkRole('tenant_admin', 'manager', 'receptionist', 'employee', 'security'), async (req, res) => {
+    try {
+        const employee = await Employee.findById(req.params.id)
+            .populate('office_id', 'name city address is_active')
+            .select('-password');
+
+        if (!employee) return res.status(404).json({ success: false, message: 'Employee not found!' });
+
+        // Tenant isolation — ensure the employee belongs to this tenant's offices
+        if (req.user.role !== 'super_admin') {
+            const Office = require('../models/Office');
+            const tenantOffices = await Office.find({ tenant_id: req.user.tenant_id }).select('_id');
+            const officeIds = tenantOffices.map(o => String(o._id));
+            const empOfficeId = typeof employee.office_id === 'object' && employee.office_id !== null
+                ? String(employee.office_id._id)
+                : String(employee.office_id);
+            if (!officeIds.includes(empOfficeId) && String(employee._id) !== String(req.user.id)) {
+                return res.status(403).json({ success: false, message: 'Access denied.' });
+            }
+        }
+
+        res.json({ success: true, data: employee });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // PUT — Update employee
 router.put('/:id', auth, checkRole('tenant_admin', 'manager'), async (req, res) => {
     try {

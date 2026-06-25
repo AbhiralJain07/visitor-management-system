@@ -184,7 +184,7 @@ export const useTenants = (search = '', status = 'All') => {
 
 export const useCreateTenant = () => {
   const queryClient = useQueryClient();
-  return useMutation<TenantCompany, Error, Omit<TenantCompany, '_id' | 'createdAt' | 'updatedAt' | 'activeUsers'>>({
+  return useMutation<{ tenant: TenantCompany; adminCredentials?: { email: string; password: string } }, Error, any>({
     mutationFn: async (payload) => {
       try {
         const backendPayload = {
@@ -198,9 +198,13 @@ export const useCreateTenant = () => {
           plan: payload.subscriptionPlan?.toLowerCase(),
           maxUsers: payload.maxUsers,
           status: payload.status,
+          adminPassword: payload.adminPassword || undefined,  // Pass if provided
         };
         const response = await httpClient.post('/tenants', backendPayload);
-        return mapTenant(response.data.data);
+        return {
+          tenant: mapTenant(response.data.data),
+          adminCredentials: response.data.adminCredentials,
+        };
       } catch (err) {
         console.warn('Creating tenant via mock.');
         const newTenant: TenantCompany = {
@@ -211,7 +215,7 @@ export const useCreateTenant = () => {
           updatedAt: new Date().toISOString(),
         };
         mockTenants.unshift(newTenant);
-        return newTenant;
+        return { tenant: newTenant };
       }
     },
     onSuccess: () => {

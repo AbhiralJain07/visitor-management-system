@@ -43,6 +43,7 @@ export const tenantFormSchema = z.object({
   subscriptionPlan: z.enum(['Basic', 'Standard', 'Premium', 'Enterprise']),
   maxUsers: z.number().int().min(1, { message: 'Maximum users must be at least 1.' }),
   status: z.enum(['Active', 'Suspended', 'Pending']),
+  adminPassword: z.string().optional(),
 });
 
 export type TenantFormFields = z.infer<typeof tenantFormSchema>;

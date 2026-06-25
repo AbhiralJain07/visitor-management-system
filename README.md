@@ -49,18 +49,26 @@ Atithi VMS digitizes and automates the entire check-in workflow. By utilizing AI
 ### 🏢 Multi-Tenancy & Location Support
 - **Multi-Tenant Isolation:** Secure data separation ensuring that different companies (tenants) can use the same server instance without cross-access.
 - **Office/Branch Management:** Manage multiple offices, branches, and rooms (realms) under a single tenant.
+- **Office Suspension (Soft Delete):** Offices can be suspended (soft-deleted) using an active/inactive status toggle to keep records intact inside the database while hiding/inactivating them on the UI.
+- **Custom Admin Credentials:** Super admins can set custom credentials for new tenants or copy auto-generated ones on creation.
 
 ### 👤 Guest Management & Security
 - **Biometric Identity Scanning:** AI face recognition that captures and creates face embeddings to identify returning guests or flag blacklisted profiles.
 - **Blacklist Restrictions:** Identify and restrict unwanted individuals with direct visual alerts at the reception desk.
+- **Aadhaar Privacy & Masking:** Automatic masking of visitor IDs (e.g. `XXXX-XXXX-1234`) in responses, with ID types and numbers made fully optional for visitors.
 - **Custom Master Data:** Configurable fields for visit purposes, departments, and ID card types.
+
+### 🔑 Authentication & Access Control
+- **Streamlined Login Flow:** Login screen with NO Company dropdown. The system automatically identifies the tenant based on the email/username domain and redirects users to their environment.
+- **Authentication Block for Suspended Accounts:** Suspended users or users under suspended tenants are blocked from authenticating and are shown clear help instructions.
+- **Dynamic Worker Profiles:** Click on any worker to view a dedicated, highly detailed profile view outlining active status, role badge, location, department, and registration timestamp.
 
 ### 💬 Real-Time Workflows
 - **Instant Notifications:** Automatic Telegram messages dispatched to host employees when their visitor checks in.
 - **Approval Actions:** Hosts can approve or reject visitor access requests with a single click from their dashboard.
 
 ### 📈 Reports & Logs
-- **Analytics Dashboard:** Graphical widgets showcasing daily traffic volume, hourly check-in frequency, and department breakdowns.
+- **Analytics Dashboard & Restore:** Graphical widgets showcasing daily traffic volume, hourly check-in frequency, and department breakdowns. All data is restored automatically when a tenant is reactivated (unsuspended).
 - **Comprehensive Audit Trails:** Automatic logging of user logins, visitor registrations, check-in attempts, and profile modifications.
 
 ---

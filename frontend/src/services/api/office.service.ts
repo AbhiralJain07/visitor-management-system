@@ -34,7 +34,7 @@ export const OfficeService = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const response = await httpClient.delete<ApiResponse<any>>(`/offices/${id}`);
+    const response = await httpClient.put<ApiResponse<any>>(`/offices/${id}`, { is_active: false });
     return response.data.success;
   }
 };

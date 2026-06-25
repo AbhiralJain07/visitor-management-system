@@ -110,6 +110,10 @@ const { auth, checkRole } = require('../middleware/auth');
  *                 default: true
  *               logo_url:
  *                 type: string
+ *               adminPassword:
+ *                 type: string
+ *                 description: Optional initial admin user password (auto-generated if not provided)
+ *                 example: AdminPass123
  *     responses:
  *       201:
  *         description: Tenant created successfully
@@ -276,16 +280,45 @@ router.get('/:id', auth, checkRole('super_admin', 'auditor'), async (req, res) =
     }
 });
 
-// POST /api/tenants
+// POST /api/tenants — Create tenant + auto-create tenant_admin user
 router.post('/', auth, checkRole('super_admin'), async (req, res) => {
     try {
+        const bcrypt = require('bcryptjs');
+        const User = require('../models/User');
+
         const existing = await Tenant.findOne({ $or: [{ code: req.body.code?.toUpperCase() }, { email: req.body.email }] });
         if (existing) {
             return res.status(409).json({ success: false, message: 'A tenant with this code or email already exists.' });
         }
+
+        // Create Tenant
         const tenant = new Tenant(req.body);
         await tenant.save();
-        res.status(201).json({ success: true, data: tenant });
+
+        // Auto-generate password if not provided
+        const rawPassword = req.body.adminPassword || `Admin@${Math.random().toString(36).slice(-6).toUpperCase()}`;
+        const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+        // Create tenant_admin User account
+        const adminUser = new User({
+            name: req.body.contactPerson || req.body.name + ' Admin',
+            email: req.body.email,
+            password: hashedPassword,
+            role: 'tenant_admin',
+            tenant_id: tenant._id,
+            is_active: true
+        });
+        await adminUser.save();
+
+        res.status(201).json({
+            success: true,
+            data: tenant,
+            adminCredentials: {
+                email: adminUser.email,
+                password: rawPassword,   // Only shown once — superadmin must note this
+                note: 'Share these credentials securely with the tenant admin. Password cannot be retrieved again.'
+            }
+        });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
